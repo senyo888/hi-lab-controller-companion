@@ -32,6 +32,20 @@ deployment_status:
       selector:
         text:
 
+controller_health:
+  name: Controller health
+  description: Read gateway, target, lock, package-ownership, and deployment readiness.
+
+discard_prepared_version:
+  name: Discard prepared version
+  description: Restore the verified pre-activation package without restarting Home Assistant.
+  fields:
+    deployment_id:
+      name: Deployment ID
+      required: true
+      selector:
+        text:
+
 rollback_deployment:
   name: Roll back deployment
   description: Restore the verified predecessor for a rollback-required deployment.

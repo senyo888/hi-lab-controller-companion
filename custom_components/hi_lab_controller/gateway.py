@@ -183,8 +183,18 @@ class GatewayClient:
             {"deployment_id": deployment_id, "nonce": nonce, "user_id": user_id},
         )
 
+    def discard(self, deployment_id: str, user_id: str) -> dict:
+        nonce = self._nonce("discard", user_id)
+        return self._post(
+            "/v1/discard",
+            {"deployment_id": deployment_id, "nonce": nonce, "user_id": user_id},
+        )
+
     def status(self, deployment_id: str, user_id: str) -> dict:
         return self._post(
             "/v1/status",
             {"deployment_id": deployment_id, "user_id": user_id},
         )
+
+    def health(self, user_id: str) -> dict:
+        return self._post("/v1/health", {"user_id": user_id})

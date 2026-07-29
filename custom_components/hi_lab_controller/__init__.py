@@ -105,6 +105,30 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
 
+    async def health(call: ServiceCall) -> ServiceResponse | None:
+        gateway, user_id = await _admin_client(call)
+        try:
+            result = await asyncio.to_thread(gateway.health, user_id)
+            return result if call.return_response else None
+        except GatewayError as err:
+            raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+
+    async def discard(call: ServiceCall) -> ServiceResponse | None:
+        gateway, user_id = await _admin_client(call)
+        try:
+            result = await asyncio.to_thread(
+                gateway.discard,
+                call.data["deployment_id"],
+                user_id,
+            )
+        except GatewayError as err:
+            raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        await _notify(
+            f"Prepared deployment `{result['deployment_id']}` is `{result['state']}`. "
+            "The verified previous package was restored without restarting Home Assistant."
+        )
+        return result if call.return_response else None
+
     async def rollback(call: ServiceCall) -> ServiceResponse | None:
         gateway, user_id = await _admin_client(call)
         try:
@@ -143,6 +167,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         DOMAIN,
         "deployment_status",
         status,
+        schema=DEPLOYMENT_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "controller_health",
+        health,
+        schema=vol.Schema({}),
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "discard_prepared_version",
+        discard,
         schema=DEPLOYMENT_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
     )
