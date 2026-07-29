@@ -1,0 +1,43 @@
+prepare_version:
+  name: Prepare version
+  description: Resolve and transactionally stage one allowlisted public V2.0 profile.
+  fields:
+    profile:
+      name: Source profile
+      description: Fixed controller-owned source profile.
+      required: true
+      selector:
+        select:
+          options:
+            - public_patch_1
+            - public_main
+
+activate_prepared_version:
+  name: Activate prepared version
+  description: Restart the Lab for the exact verified deployment waiting for activation.
+  fields:
+    deployment_id:
+      name: Deployment ID
+      required: true
+      selector:
+        text:
+
+deployment_status:
+  name: Deployment status
+  description: Read the controller ledger status for one deployment.
+  fields:
+    deployment_id:
+      name: Deployment ID
+      required: true
+      selector:
+        text:
+
+rollback_deployment:
+  name: Roll back deployment
+  description: Restore the verified predecessor for a rollback-required deployment.
+  fields:
+    deployment_id:
+      name: Deployment ID
+      required: true
+      selector:
+        text:

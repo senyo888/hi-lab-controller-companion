@@ -1,0 +1,19 @@
+{
+  "config": {
+    "abort": {
+      "single_instance_allowed": "Only one HI Lab Controller instance is allowed."
+    },
+    "error": {
+      "cannot_connect": "Cannot authenticate to the external HI Lab Controller."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "shared_secret": "Shared secret"
+        },
+        "description": "Private HA Lab only. Requests use the signed controller mailbox; the companion has no Git, SSH, or deployment authority.",
+        "title": "Connect HI Lab Controller"
+      }
+    }
+  }
+}
