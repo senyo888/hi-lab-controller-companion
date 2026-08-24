@@ -4,21 +4,31 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from dataclasses import dataclass
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+)
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.typing import ConfigType
 
 from .const import (
     CONF_SHARED_SECRET,
     DOMAIN,
     NOTIFICATION_ID,
+    PLATFORMS,
+    RUNTIME_DATA,
+    STATUS_PATH,
 )
+from .coordinator import HILabStatusCoordinator
 from .gateway import GatewayClient, GatewayError
-
+from .status_reader import StatusSnapshotReader
 
 PROFILE_SCHEMA = vol.Schema(
     {vol.Required("profile"): vol.In(("public_patch_1", "public_main"))}
@@ -26,18 +36,33 @@ PROFILE_SCHEMA = vol.Schema(
 DEPLOYMENT_SCHEMA = vol.Schema({vol.Required("deployment_id"): cv.string})
 
 
+@dataclass(frozen=True)
+class HILabRuntimeData:
+    """Config-entry runtime state."""
+
+    client: GatewayClient
+    coordinator: HILabStatusCoordinator
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register actions even when the controller config entry is unavailable."""
+
     async def _admin_client(call: ServiceCall) -> tuple[GatewayClient, str]:
         user_id = call.context.user_id
         if not user_id:
-            raise HomeAssistantError("HI Lab Controller actions require an authenticated user")
+            raise HomeAssistantError(
+                "HI Lab Controller actions require an authenticated user"
+            )
         user = await hass.auth.async_get_user(user_id)
         if user is None or not user.is_admin:
-            raise HomeAssistantError("HI Lab Controller actions require an administrator")
+            raise HomeAssistantError(
+                "HI Lab Controller actions require an administrator"
+            )
         clients = hass.data.get(DOMAIN, {})
         if len(clients) != 1:
-            raise HomeAssistantError("HI Lab Controller has no unique configured gateway")
+            raise HomeAssistantError(
+                "HI Lab Controller has no unique configured gateway"
+            )
         return next(iter(clients.values())), user_id
 
     async def _notify(message: str) -> None:
@@ -51,6 +76,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             },
             blocking=True,
         )
+
+    async def _refresh_status() -> None:
+        runtimes = hass.data.get(RUNTIME_DATA, {})
+        if len(runtimes) == 1:
+            runtime = next(iter(runtimes.values()))
+            await runtime.coordinator.async_request_refresh()
 
     async def _restart_after_response() -> None:
         await asyncio.sleep(3)
@@ -67,6 +98,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
         await _notify(
             f"Deployment `{result['deployment_id']}` is `{result['state']}`. "
             "Activation remains a separate administrator action."
@@ -83,6 +116,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
         activation = result.get("activation_result") or {}
         if activation.get("restart_approved") is not True:
             raise HomeAssistantError("controller did not approve this exact restart")
@@ -104,6 +139,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return result if call.return_response else None
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
 
     async def health(call: ServiceCall) -> ServiceResponse | None:
         gateway, user_id = await _admin_client(call)
@@ -112,6 +149,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return result if call.return_response else None
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
 
     async def discard(call: ServiceCall) -> ServiceResponse | None:
         gateway, user_id = await _admin_client(call)
@@ -123,6 +162,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
         await _notify(
             f"Prepared deployment `{result['deployment_id']}` is `{result['state']}`. "
             "The verified previous package was restored without restarting Home Assistant."
@@ -139,9 +180,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         except GatewayError as err:
             raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
         activation = result.get("activation_result") or {}
         if activation.get("restart_approved") is not True:
-            raise HomeAssistantError("controller did not approve this exact rollback restart")
+            raise HomeAssistantError(
+                "controller did not approve this exact rollback restart"
+            )
         await _notify(
             f"Rollback accepted for `{result['deployment_id']}`. "
             "Home Assistant will restart; controller verification remains authoritative."
@@ -199,9 +244,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data[CONF_SHARED_SECRET],
     )
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = client
+    reader = StatusSnapshotReader(
+        STATUS_PATH,
+        entry.data[CONF_SHARED_SECRET],
+    )
+    coordinator = HILabStatusCoordinator(hass, entry, reader)
+    await coordinator.async_config_entry_first_refresh()
+    runtime = HILabRuntimeData(client=client, coordinator=coordinator)
+    hass.data.setdefault(RUNTIME_DATA, {})[entry.entry_id] = runtime
+    entry.runtime_data = runtime
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if not unloaded:
+        return False
+    hass.data.get(RUNTIME_DATA, {}).pop(entry.entry_id, None)
     hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     return True

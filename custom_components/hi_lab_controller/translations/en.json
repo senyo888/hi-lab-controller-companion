@@ -15,5 +15,72 @@
         "title": "Connect HI Lab Controller"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "status_feed": {
+        "name": "Feed",
+        "state": {
+          "initializing": "Initializing",
+          "fresh": "Fresh",
+          "stale": "Stale",
+          "missing": "Missing",
+          "invalid_signature": "Invalid signature",
+          "schema_mismatch": "Schema mismatch",
+          "clock_invalid": "Clock invalid"
+        }
+      },
+      "last_contact": {
+        "name": "Last contact"
+      },
+      "controller_readiness": {
+        "name": "Readiness",
+        "state": {
+          "READY": "Ready",
+          "BLOCKED": "Blocked"
+        }
+      },
+      "active_deployment": {
+        "name": "Active deployment"
+      },
+      "pending_deployment": {
+        "name": "Pending deployment"
+      },
+      "mutation_lock": {
+        "name": "Mutation lock",
+        "state": {
+          "CLEAR": "Clear",
+          "HELD": "Held",
+          "CONFLICT": "Conflict",
+          "UNVERIFIED": "Unverified"
+        }
+      },
+      "accepted_baseline": {
+        "name": "Accepted baseline"
+      },
+      "last_validation": {
+        "name": "Last validation"
+      },
+      "last_outcome": {
+        "name": "Last outcome",
+        "state": {
+          "ACTIVE": "Active",
+          "BLOCKED": "Blocked",
+          "DISCARDED": "Discarded",
+          "FAILED_ACTIVATION": "Activation failed",
+          "FAILED_PRE_DEPLOY": "Pre-deployment failed",
+          "NO_CHANGE_EQUIVALENT_PACKAGE": "No change, equivalent package",
+          "RECOVERY_REQUIRED": "Recovery required",
+          "RESTORED_PRE_ACTIVATION": "Restored before activation",
+          "ROLLED_BACK": "Rolled back",
+          "unknown": "Unknown"
+        }
+      }
+    },
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Restart required"
+      }
+    }
   }
 }
