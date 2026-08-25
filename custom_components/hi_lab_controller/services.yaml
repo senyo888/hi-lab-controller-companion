@@ -12,6 +12,31 @@ prepare_version:
             - public_patch_1
             - public_main
 
+queue_prepare_version:
+  name: Queue prepare version
+  description: Queue one later public V2.0 prepare only while another mutation is active. The controller capability is default-off.
+  fields:
+    profile:
+      name: Source profile
+      description: Fixed controller-owned source profile bound immutably at admission.
+      required: true
+      selector:
+        select:
+          options:
+            - public_patch_1
+            - public_main
+
+cancel_queued_prepare:
+  name: Cancel queued prepare
+  description: Cancel one exact unclaimed prepare queue entry. Claimed work cannot be cancelled or retried.
+  fields:
+    queue_id:
+      name: Queue ID
+      description: Canonical UUID returned for the queued request.
+      required: true
+      selector:
+        text:
+
 activate_prepared_version:
   name: Activate prepared version
   description: Restart the Lab for the exact verified deployment waiting for activation.

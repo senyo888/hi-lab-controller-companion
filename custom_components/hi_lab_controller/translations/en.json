@@ -75,6 +75,18 @@
           "ROLLED_BACK": "Rolled back",
           "unknown": "Unknown"
         }
+      },
+      "prepare_queue": {
+        "name": "Prepare queue",
+        "state": {
+          "DISABLED": "Disabled",
+          "EMPTY": "Empty",
+          "WAITING": "Waiting",
+          "FULL": "Full",
+          "BLOCKED": "Blocked",
+          "DEGRADED": "Degraded",
+          "UNAVAILABLE": "Unavailable"
+        }
       }
     },
     "binary_sensor": {

@@ -176,6 +176,25 @@ class GatewayClient:
             {"deployment_id": deployment_id, "nonce": nonce, "user_id": user_id},
         )
 
+    def queue_prepare(self, profile: str, request_key: str, user_id: str) -> dict:
+        nonce = self._nonce("queue_prepare", user_id)
+        return self._post(
+            "/v1/queue-prepare",
+            {
+                "nonce": nonce,
+                "profile": profile,
+                "request_key": request_key,
+                "user_id": user_id,
+            },
+        )
+
+    def cancel_queued_prepare(self, queue_id: str, user_id: str) -> dict:
+        nonce = self._nonce("cancel_queued_prepare", user_id)
+        return self._post(
+            "/v1/cancel-queued-prepare",
+            {"queue_id": queue_id, "nonce": nonce, "user_id": user_id},
+        )
+
     def rollback(self, deployment_id: str, user_id: str) -> dict:
         nonce = self._nonce("rollback", user_id)
         return self._post(

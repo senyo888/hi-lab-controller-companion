@@ -182,6 +182,26 @@ SENSORS = (
             ("deployment_id", "profile", "completed_at", "error_codes"),
         ),
     ),
+    HILabSensorDescription(
+        key="prepare_queue",
+        device_class=SensorDeviceClass.ENUM,
+        enum_options=(
+            "DISABLED",
+            "EMPTY",
+            "WAITING",
+            "FULL",
+            "BLOCKED",
+            "DEGRADED",
+            "UNAVAILABLE",
+        ),
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda value: _block(value, "queue").get("state", "DISABLED"),
+        attributes_fn=lambda value: _attributes(
+            value,
+            "queue",
+            ("enabled", "depth", "max_depth", "entries"),
+        ),
+    ),
 )
 
 
@@ -259,14 +279,14 @@ class HILabFeedSensor(HILabStatusEntity, SensorEntity):
         data = self.coordinator.data
         if data is None:
             return {
-                "supported_schema_major": 1,
+                "supported_schema_majors": [1, 2],
                 "observed_schema_major": None,
                 "error_code": None,
             }
         document = data.document or {}
         snapshot = _block(document, "snapshot")
         return {
-            "supported_schema_major": 1,
+            "supported_schema_majors": [1, 2],
             "observed_schema_major": data.observed_schema_major,
             "error_code": data.error_code,
             "controller_boot_id": snapshot.get("controller_boot_id"),

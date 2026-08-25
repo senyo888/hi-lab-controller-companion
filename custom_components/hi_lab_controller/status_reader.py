@@ -17,9 +17,11 @@ from typing import Any
 from .const import STATUS_MAX_BYTES, STATUS_TTL_SECONDS
 
 CONTRACT_NAME = "hi-lab-status"
-SUPPORTED_SCHEMA_MAJOR = 1
+SUPPORTED_SCHEMA_MAJORS = {1, 2}
 SIGNATURE_ALGORITHM = "hmac-sha256-status-v1"
 SIGNATURE_DOMAIN = b"hi-lab-status-v1\n"
+SIGNATURE_ALGORITHMS = {1: SIGNATURE_ALGORITHM, 2: "hmac-sha256-status-v2"}
+SIGNATURE_DOMAINS = {1: SIGNATURE_DOMAIN, 2: b"hi-lab-status-v2\n"}
 HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 INSTANCE_ID = re.compile(r"^[0-9a-f]{24}$")
 UUID = re.compile(
@@ -269,6 +271,7 @@ class StatusSnapshotReader:
             raise ValueError("schema major is invalid")
         if type(contract.get("schema_minor")) is not int:
             raise ValueError("schema minor is invalid")
+        schema_major = contract["schema_major"]
         if not _exact_keys(
             snapshot,
             {
@@ -302,14 +305,17 @@ class StatusSnapshotReader:
                 "queue",
                 "ci_artifact_cache",
             },
-        ) or capabilities != {
+        ):
+            raise ValueError("status capabilities fields differ")
+        expected_capabilities = {
             "status_entities": True,
             "dashboard": False,
             "known_good_prepare": False,
-            "queue": False,
+            "queue": capabilities.get("queue") if schema_major == 2 else False,
             "ci_artifact_cache": False,
-        }:
-            raise ValueError("status capabilities differ from schema 1.0")
+        }
+        if capabilities != expected_capabilities or type(capabilities.get("queue")) is not bool:
+            raise ValueError("status capabilities differ")
         if not _exact_keys(
             controller,
             {"readiness", "blocker_codes", "overflow_count"},
@@ -503,16 +509,73 @@ class StatusSnapshotReader:
             ):
                 raise ValueError("last outcome is invalid")
         if document.get("action_eligibility") != {}:
-            raise ValueError("action eligibility must remain disabled in schema 1.0")
-        if not _exact_keys(queue, {"enabled", "depth", "max_depth", "entries"}):
-            raise ValueError("queue fields differ")
-        if (
-            queue.get("enabled") is not False
-            or queue.get("depth") != 0
-            or queue.get("max_depth") != 0
-            or queue.get("entries") != []
-        ):
-            raise ValueError("queue must remain explicitly disabled in schema 1.0")
+            raise ValueError("action eligibility must remain disabled")
+        if schema_major == 1:
+            if not _exact_keys(queue, {"enabled", "depth", "max_depth", "entries"}):
+                raise ValueError("queue fields differ")
+            if (
+                queue.get("enabled") is not False
+                or queue.get("depth") != 0
+                or queue.get("max_depth") != 0
+                or queue.get("entries") != []
+            ):
+                raise ValueError("queue must remain explicitly disabled in schema 1.0")
+        else:
+            if not _exact_keys(queue, {"state", "enabled", "depth", "max_depth", "entries"}):
+                raise ValueError("schema 2 queue fields differ")
+            entries = queue.get("entries")
+            if (
+                queue.get("state")
+                not in {
+                    "DISABLED",
+                    "EMPTY",
+                    "WAITING",
+                    "FULL",
+                    "BLOCKED",
+                    "DEGRADED",
+                    "UNAVAILABLE",
+                }
+                or type(queue.get("enabled")) is not bool
+                or type(queue.get("depth")) is not int
+                or type(queue.get("max_depth")) is not int
+                or queue["max_depth"] not in {1, 2}
+                or not isinstance(entries, list)
+                or len(entries) > 2
+                or queue["depth"] != len(entries)
+                or capabilities["queue"] is not queue["enabled"]
+            ):
+                raise ValueError("schema 2 queue summary is invalid")
+            for position, entry in enumerate(entries, start=1):
+                if (
+                    not isinstance(entry, dict)
+                    or not _exact_keys(
+                        entry,
+                        {
+                            "queue_id",
+                            "label",
+                            "position",
+                            "state",
+                            "admitted_at",
+                            "expires_at",
+                            "reason_code",
+                        },
+                    )
+                    or not isinstance(entry.get("queue_id"), str)
+                    or UUID.fullmatch(entry["queue_id"]) is None
+                    or entry.get("label") not in PUBLIC_PROFILES
+                    or entry.get("position") != position
+                    or entry.get("state") not in {"QUEUED", "CLAIMED"}
+                    or not _timestamp_or_none(entry.get("admitted_at"))
+                    or not _timestamp_or_none(entry.get("expires_at"))
+                    or (
+                        entry.get("reason_code") is not None
+                        and (
+                            not isinstance(entry["reason_code"], str)
+                            or SAFE_CODE.fullmatch(entry["reason_code"]) is None
+                        )
+                    )
+                ):
+                    raise ValueError("schema 2 queue entry is invalid")
 
     def read(self) -> StatusData:
         try:
@@ -536,7 +599,7 @@ class StatusSnapshotReader:
             and isinstance(contract.get("schema_major"), int)
             else None
         )
-        if observed_major != SUPPORTED_SCHEMA_MAJOR:
+        if observed_major not in SUPPORTED_SCHEMA_MAJORS:
             return self._result(
                 "schema_mismatch",
                 error_code="STATUS_SCHEMA_UNSUPPORTED",
@@ -563,7 +626,7 @@ class StatusSnapshotReader:
             )
         signature_value = signature.get("value")
         if (
-            signature.get("algorithm") != SIGNATURE_ALGORITHM
+            signature.get("algorithm") != SIGNATURE_ALGORITHMS[observed_major]
             or not isinstance(signature_value, str)
             or HEX_64.fullmatch(signature_value) is None
         ):
@@ -576,7 +639,7 @@ class StatusSnapshotReader:
         unsigned.pop("signature", None)
         expected = hmac.new(
             self.secret,
-            SIGNATURE_DOMAIN + _canonical_json(unsigned),
+            SIGNATURE_DOMAINS[observed_major] + _canonical_json(unsigned),
             hashlib.sha256,
         ).hexdigest()
         if not hmac.compare_digest(signature_value, expected):

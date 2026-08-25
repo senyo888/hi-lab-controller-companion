@@ -34,6 +34,7 @@ PROFILE_SCHEMA = vol.Schema(
     {vol.Required("profile"): vol.In(("public_patch_1", "public_main"))}
 )
 DEPLOYMENT_SCHEMA = vol.Schema({vol.Required("deployment_id"): cv.string})
+QUEUE_SCHEMA = vol.Schema({vol.Required("queue_id"): cv.string})
 
 
 @dataclass(frozen=True)
@@ -128,6 +129,39 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         hass.async_create_task(_restart_after_response())
         return result if call.return_response else None
 
+    async def queue_prepare(call: ServiceCall) -> ServiceResponse | None:
+        gateway, user_id = await _admin_client(call)
+        try:
+            result = await asyncio.to_thread(
+                gateway.queue_prepare,
+                call.data["profile"],
+                f"ha-queue-{uuid.uuid4()}",
+                user_id,
+            )
+        except GatewayError as err:
+            raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
+        await _notify(
+            f"Prepare request `{result['queue_id']}` is `{result['state']}`. "
+            "It remains bounded and may be cancelled before claim."
+        )
+        return result if call.return_response else None
+
+    async def cancel_queued_prepare(call: ServiceCall) -> ServiceResponse | None:
+        gateway, user_id = await _admin_client(call)
+        try:
+            result = await asyncio.to_thread(
+                gateway.cancel_queued_prepare,
+                call.data["queue_id"],
+                user_id,
+            )
+        except GatewayError as err:
+            raise HomeAssistantError(f"{err.code}: {err.summary}") from err
+        finally:
+            await _refresh_status()
+        return result if call.return_response else None
+
     async def status(call: ServiceCall) -> ServiceResponse | None:
         gateway, user_id = await _admin_client(call)
         try:
@@ -206,6 +240,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         "activate_prepared_version",
         activate,
         schema=DEPLOYMENT_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "queue_prepare_version",
+        queue_prepare,
+        schema=PROFILE_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "cancel_queued_prepare",
+        cancel_queued_prepare,
+        schema=QUEUE_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
     )
     hass.services.async_register(
