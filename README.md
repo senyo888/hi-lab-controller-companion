@@ -1,3 +1,5 @@
+![](assets/hi-lab-controller-companion-header.png)
+
 # HI Lab Controller Companion
 
 The public Home Assistant companion for the separately operated **HI Lab Controller**.

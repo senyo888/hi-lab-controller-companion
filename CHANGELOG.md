@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added the official HI Lab Controller Companion artwork as the README header while
+  preserving the repository's public-safe controller/companion authority boundary.
 - Added an optional, importable `dashboards/hi-lab-operations.yaml` dashboard with a
   responsive Operations view and a separate detailed Evidence view, built only from
   native Home Assistant cards and the companion's eleven entities.
