@@ -5,9 +5,10 @@
     "@senyo888"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/senyo888/humidity-intelligence",
+  "documentation": "https://github.com/senyo888/hi-lab-controller-companion",
   "integration_type": "service",
   "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/senyo888/hi-lab-controller-companion/issues",
   "requirements": [],
-  "version": "0.4.0"
+  "version": "0.4.1"
 }
