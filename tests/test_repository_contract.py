@@ -21,6 +21,11 @@ class RepositoryContractTests(unittest.TestCase):
         hacs = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
         self.assertEqual(hacs, {"name": "HI Lab Controller", "hide_default_branch": True})
 
+    def test_public_repository_has_mit_license(self) -> None:
+        license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+        self.assertTrue(license_text.startswith("MIT License\n"))
+        self.assertIn("Copyright (c) 2026 Senyo", license_text)
+
     def test_manifest_identity_and_public_routes(self) -> None:
         manifest = json.loads((COMPONENT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["domain"], "hi_lab_controller")

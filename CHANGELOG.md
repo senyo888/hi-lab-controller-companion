@@ -5,6 +5,7 @@
 - Established the companion as an independently versioned custom-HACS integration.
 - Added public-safe repository, architecture, security, validation, and branding
   surfaces.
+- Adopted the MIT License for the public companion repository.
 - Corrected documentation and issue routes to the companion repository.
 - Declared the integration as config-entry-only and removed invalid legacy uppercase
   enum translation maps without changing the underlying entity state values.

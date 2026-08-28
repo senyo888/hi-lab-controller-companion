@@ -59,3 +59,7 @@ missing, stale, malformed, unsigned, permission-unsafe, or incompatible.
   transactional bootstrap is a separately governed recovery route only.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) and [SECURITY.md](SECURITY.md).
+
+## Licence
+
+The companion is released under the [MIT License](LICENSE).
