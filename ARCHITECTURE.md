@@ -61,8 +61,10 @@ states to explicit expected/clear, attention, and degraded wording; it does not
 recompute readiness, deployment, lock, validation, baseline, queue, outcome, or
 restart truth.
 
-The dashboard contains no administrator actions or service calls and is not installed
-or mutated automatically. Its presence in this repository does not change the signed
+The dashboard contains no administrator action call or service call and is not
+installed or mutated automatically. Its single **Open Actions tool**
+button is a bounded Home Assistant navigation action only: it cannot prefill or
+execute a companion action. Its presence in this repository does not change the signed
 status `dashboard` capability, which remains controller-provided protocol truth, and
 does not add runtime, deployment, baseline, HACS, publication, or release authority.
 Removing the dashboard changes presentation only.

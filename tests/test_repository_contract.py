@@ -123,8 +123,14 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertNotIn("custom:", dashboard)
         self.assertNotRegex(
             dashboard,
-            r"(?m)^\s*(?:tap_action|hold_action|double_tap_action|service|action):",
+            r"(?m)^\s*(?:hold_action|double_tap_action|service):",
         )
+        self.assertEqual(dashboard.count("tap_action:"), 1)
+        self.assertEqual(dashboard.count("action: navigate"), 1)
+        self.assertEqual(
+            dashboard.count("navigation_path: /config/developer-tools/action"), 1
+        )
+        self.assertIn("name: Open Actions tool", dashboard)
         self.assertEqual(dashboard.count("path: hi-lab-controller\n"), 1)
         self.assertEqual(dashboard.count("path: hi-lab-controller-evidence\n"), 1)
         self.assertEqual(dashboard.count("layout: responsive"), 2)
@@ -150,11 +156,13 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertIn(
             "actual Home Assistant appearance follows the installed theme", preview
         )
+        for surface_name in ("Operations", "Evidence", "Open Actions tool"):
+            self.assertIn(surface_name, preview)
         self.assertNotIn("/" + "Users" + "/", preview)
         self.assertNotIn("homeassistant" + ".local", preview)
         gallery = (ROOT / "dashboards" / "README.md").read_text(encoding="utf-8")
         self.assertIn("hi-lab-operations.yaml", gallery)
-        self.assertIn("no administrator", gallery)
+        self.assertIn("navigation only", gallery)
 
     def test_public_text_contains_no_local_identity_or_secret_value(self) -> None:
         forbidden = (

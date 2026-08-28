@@ -14,9 +14,12 @@
 - Added the official bundled controller mark to the self-contained public preview and
   renamed technical Stage B/Stage 3 dashboard rows to the public-facing **Integration
   health** and **Runtime truth** labels without changing their source attributes.
+- Made the native **Operations** and **Evidence** navigation model explicit and added
+  one compact **Open Actions tool** navigation-only button. It cannot
+  prefill or execute a Home Assistant action.
 - Added repository and parsed-YAML contract checks that reject undocumented entities
-  or attributes, custom cards, action/service controls, and missing degraded-state
-  coverage.
+  or attributes, custom cards, action/service calls, unbounded interactions, and
+  missing degraded-state coverage.
 - Added a public operator guide for HACS installation, activation, verification,
   updates, rollback, all eleven native entities, and all eight administrator actions.
 - Added a README architecture diagram that distinguishes Home Assistant presentation

@@ -704,6 +704,18 @@ views:
               operator workflow. They are intentionally absent here so a status glance
               cannot become an accidental mutation path.
 
+          - type: button
+            name: Open Actions tool
+            icon: mdi:tools
+            show_name: true
+            show_icon: true
+            tap_action:
+              action: navigate
+              navigation_path: /config/developer-tools/action
+            grid_options:
+              columns: 6
+              rows: 2
+
   - title: Evidence
     path: hi-lab-controller-evidence
     icon: mdi:text-box-search-outline
@@ -719,7 +731,8 @@ views:
           # Controller evidence
 
           Selected exact controller-authored attributes for verification and diagnosis.
-          Return to **Operations** for the responsive status overview.
+          This tab carries the detail intentionally kept out of the calm **Operations**
+          glance. Return to **Operations** for the responsive status overview.
     sections:
       - type: grid
         background:

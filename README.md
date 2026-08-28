@@ -42,7 +42,7 @@ flowchart LR
     subgraph HA["Home Assistant — presentation and bounded requests"]
         S["Settings → Devices & services<br/>configuration"]
         E["11 native entities<br/>status and readiness"]
-        A["Developer Tools → Actions<br/>8 fixed administrator actions"]
+        A["Home Assistant Actions tool<br/>8 fixed administrator actions"]
         N["Persistent notifications<br/>operation results"]
         D["Optional operations dashboard<br/>available, read-only"]
     end
@@ -98,6 +98,12 @@ marks blocked, invalid, stale, degraded, or unavailable truth. Cyan, teal, and
 blue-grey identity, timestamp, and disabled-state tiles are neutral evidence—not
 healthy verdicts. Active deployment, pending deployment, and accepted baseline remain
 separate facts, and unavailable state never appears healthy.
+
+The two view names become native Home Assistant tabs: **Operations** keeps the calm
+at-a-glance hierarchy, while **Evidence** exposes the selected exact attributes that
+would otherwise crowd it. One small **Open Actions tool** button navigates an
+administrator to Home Assistant's own action tool. It cannot prefill or execute an
+action and does not weaken the companion's controller-authority boundary.
 
 Import the raw YAML as a new dashboard after the integration has registered
 its entities. Home Assistant may assign different entity IDs after an operator rename;

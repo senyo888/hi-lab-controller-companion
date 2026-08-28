@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
   <title id="title">HI Lab Controller optional operations dashboard preview</title>
-  <desc id="desc">Illustrative public-safe preview of the read-only Home Assistant dashboard using navy, teal, and amber.</desc>
+  <desc id="desc">Illustrative public-safe preview of the read-only Home Assistant dashboard using navy, teal, and amber, with Operations, Evidence, and Actions tool navigation visible.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#061827"/>
@@ -38,6 +38,13 @@
       <circle cx="32" cy="28" r="8" fill="#4ee3df"/>
       <text x="52" y="35" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#d9f5f4">Illustrative safe data</text>
     </g>
+  </g>
+
+  <g transform="translate(76 164)" font-family="Inter, system-ui, sans-serif">
+    <rect width="172" height="38" rx="19" fill="#0b3442" stroke="#2f9ba2"/>
+    <text x="86" y="25" text-anchor="middle" font-size="16" font-weight="700" fill="#d9f5f4">Operations</text>
+    <rect x="188" width="270" height="38" rx="19" fill="#102f45" stroke="#2c6d79"/>
+    <text x="323" y="25" text-anchor="middle" font-size="15" font-weight="650" fill="#9bc8d1">Evidence · 37 selected attributes</text>
   </g>
 
   <g transform="translate(76 214)" font-family="Inter, system-ui, sans-serif">
@@ -123,6 +130,12 @@
       <text x="424" y="228" text-anchor="end" font-size="24" font-weight="700" fill="#4ee3df">ACTIVE</text>
       <text x="50" y="246" font-size="13" fill="#6fa5b1">Evidence, not baseline acceptance</text>
     </g>
+  </g>
+
+  <g transform="translate(1124 866)" font-family="Inter, system-ui, sans-serif">
+    <rect width="400" height="54" rx="18" fill="#132e43" stroke="#2c6d79"/>
+    <text x="200" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#d9f5f4">Open Actions tool</text>
+    <text x="200" y="43" text-anchor="middle" font-size="12" fill="#6fa5b1">navigation only · no action is selected or run</text>
   </g>
 
   <text x="800" y="936" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="17" fill="#6fa5b1">Illustrative preview · public-safe fixture identities · actual Home Assistant appearance follows the installed theme</text>

@@ -51,7 +51,8 @@ expected_entities = Set[
   "binary_sensor.hi_lab_controller_restart_required"
 ]
 allowed_card_types = Set[
-  "sections", "grid", "heading", "markdown", "conditional", "tile", "entities", "attribute"
+  "sections", "grid", "heading", "markdown", "conditional", "tile", "entities", "attribute",
+  "button"
 ]
 documented_attributes = {
   "sensor.hi_lab_controller_feed" => Set[
@@ -87,8 +88,10 @@ entities = Set.new
 card_types = Set.new
 attribute_rows = []
 template_attributes = []
-forbidden_keys = Set["action", "service", "service_data", "tap_action", "hold_action", "double_tap_action"]
+forbidden_keys = Set["service", "service_data", "hold_action", "double_tap_action"]
 semantic_tiles = {}
+navigation_cards = []
+action_hashes = []
 
 positive_states = lambda do |conditions, found = []|
   Array(conditions).each do |condition|
@@ -106,6 +109,8 @@ end
 walk = lambda do |value|
   case value
   when Hash
+    navigation_cards << value if value["type"] == "button" && value.key?("tap_action")
+    action_hashes << value if value.key?("action")
     if value["type"] == "conditional" && value["card"].is_a?(Hash) && value["card"]["type"] == "tile"
       color = value["card"]["color"]
       positive_states.call(value["conditions"]).each do |entity, state|
@@ -135,6 +140,25 @@ walk.call(dashboard)
 fail_contract("entity set differs: #{entities.to_a.sort.inspect}") unless entities == expected_entities
 unknown_types = card_types - allowed_card_types
 fail_contract("non-native card types found: #{unknown_types.to_a.sort.inspect}") unless unknown_types.empty?
+
+expected_navigation_card = {
+  "type" => "button",
+  "name" => "Open Actions tool",
+  "icon" => "mdi:tools",
+  "show_name" => true,
+  "show_icon" => true,
+  "tap_action" => {
+    "action" => "navigate",
+    "navigation_path" => "/config/developer-tools/action"
+  },
+  "grid_options" => {"columns" => 6, "rows" => 2}
+}.freeze
+fail_contract("exactly one bounded Actions-tool navigation button is required") unless (
+  navigation_cards == [expected_navigation_card]
+)
+fail_contract("the only action must be the bounded Actions-tool navigation") unless (
+  action_hashes == [{"action" => "navigate", "navigation_path" => "/config/developer-tools/action"}]
+)
 
 (attribute_rows + template_attributes).each do |entity, attribute|
   allowed = documented_attributes.fetch(entity) do
@@ -201,6 +225,9 @@ fail_contract("custom cards are forbidden") if raw.include?("custom:")
 fail_contract("historical contact must not use Home Assistant last_updated") if raw.include?("last_updated")
 ["Integration health", "Runtime truth"].each do |public_name|
   fail_contract("public validation name #{public_name.inspect} is absent") unless raw.include?(public_name)
+end
+["Operations", "Evidence", "Open Actions tool"].each do |surface_name|
+  fail_contract("preview surface name #{surface_name.inspect} is absent") unless preview.include?(surface_name)
 end
 
 puts(

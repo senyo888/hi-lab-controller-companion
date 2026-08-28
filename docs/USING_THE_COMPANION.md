@@ -12,17 +12,21 @@ HACS installs one Home Assistant custom integration:
 - a configuration flow under **Settings → Devices & services**;
 - ten sensors and one binary sensor attached to one **HI Lab Controller** service
   device;
-- eight fixed actions under **Developer Tools → Actions**; and
+- eight fixed actions in Home Assistant's **Actions tool**; and
 - persistent notifications for important prepare, queue, activate, discard, and
   rollback results.
+
+Home Assistant labels that destination **Tools → Actions** from 2026.8 and
+**Developer Tools → Actions** through 2026.7.
 
 The repository includes an optional read-only dashboard template. Its responsive
 Operations view maps explicit controller states to green, amber, and red presentation,
 while a separate Evidence view retains selected exact attributes. Raw entity state
 remains authoritative; neutral cyan, teal, and blue-grey tiles do not assert health.
 The template uses the eleven native entities and built-in Home Assistant cards only.
-It is not installed automatically, contains no action controls, and does not duplicate
-controller logic.
+It is not installed automatically, contains no controller action call, and does not
+duplicate controller logic. Its sole interaction is bounded navigation to Home
+Assistant's native action tool.
 
 ## Authority boundary
 
@@ -99,7 +103,7 @@ After the approved restart and configuration:
 4. Confirm controller **Readiness**, **Mutation lock**, **Pending deployment**,
    **Prepare queue**, and **Restart required** agree with the external controller's
    evidence.
-5. Open **Developer Tools → Actions** and confirm all eight
+5. Open Home Assistant's **Actions tool** and confirm all eight
    `hi_lab_controller.*` actions are registered.
 6. If a read-only operational check is authorized, run **HI Lab Controller: Controller
    health** and review its returned response. Merely seeing an action in the list does
@@ -140,7 +144,7 @@ configured controller gateway. Registration is discoverability, not authority.
 | `hi_lab_controller.queue_prepare_version` | `profile`: `public_patch_1` or `public_main` | Queues one later prepare request when the controller capability is enabled and another mutation is active. It does not activate the result. The capability is controller-owned and default-off. |
 | `hi_lab_controller.cancel_queued_prepare` | `queue_id` | Cancels one exact unclaimed queue entry. Claimed work cannot be cancelled or retried through this action. |
 
-Read-only example for **Developer Tools → Actions**:
+Read-only example for Home Assistant's **Actions tool**:
 
 ```yaml
 action: hi_lab_controller.controller_health
@@ -225,9 +229,9 @@ maintainer-governed recovery route, not the normal HACS update path.
 
 The template at [`dashboards/hi-lab-operations.yaml`](../dashboards/hi-lab-operations.yaml)
 is an optional presentation surface. It uses only core **Sections**, **Heading**,
-**Markdown**, **Conditional**, **Tile**, and **Entities** cards and native attribute
-rows. It has no custom-card, theme, JavaScript, network, or controller dependency
-beyond the companion's eleven native entities.
+**Markdown**, **Conditional**, **Tile**, **Entities**, and **Button** cards and native
+attribute rows. It has no custom-card, theme, JavaScript, external-network, or
+controller dependency beyond the companion's eleven native entities.
 
 ### Import as a new dashboard
 
@@ -264,6 +268,16 @@ hidden view can still be reached by direct URL. Keep dashboard access Admin only
 do not publish or share screenshots, exports, or raw YAML captured from the live
 **Evidence** view. The repository preview uses synthetic public-safe identities only.
 
+The imported **Operations** and **Evidence** views appear as native Home Assistant
+tabs. Operations is deliberately calm and scannable; Evidence carries the selected
+exact controller attributes that would make the operational glance too dense. The
+repository illustration previews that navigation model, but is a static public-safe
+image rather than a second dashboard implementation.
+
+The version-neutral **Open Actions tool** label works across that naming change. The
+template keeps the 2026.4-compatible internal path, which current frontends redirect
+to **Tools → Actions**.
+
 ### Verify truth and responsive layout
 
 After import:
@@ -289,14 +303,17 @@ After import:
    should reflow without horizontal scrolling; Evidence attribute rows may wrap but
    must remain readable. This check remains release evidence until the exact YAML is
    imported and rendered in Home Assistant.
-7. Open the raw configuration again and confirm there is no `custom:` card, action,
-   service, tap action, hold action, or double-tap action.
+7. Open the raw configuration again and confirm there is no `custom:` card, service
+   call, hold action, or double-tap action. The sole `tap_action` must be `navigate`
+   with the exact path `/config/developer-tools/action`.
 
 The Markdown and conditional cards only present direct entity states and documented
 attributes. They do not decide readiness, validate a deployment, resolve a lock,
 approve a restart, dispatch queue work, or accept a baseline. Administrator actions
 remain separately documented under [The eight administrator actions](#the-eight-administrator-actions)
-and are intentionally absent from the dashboard.
+and are intentionally absent from the dashboard. **Open Actions tool**
+only opens Home Assistant's native administrator tool; it does not prefill, select, or
+execute an action. Admin access and deliberate action selection remain required.
 
 ### Remove or roll back the dashboard
 
