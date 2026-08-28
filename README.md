@@ -44,14 +44,14 @@ flowchart LR
         E["11 native entities<br/>status and readiness"]
         A["Developer Tools → Actions<br/>8 fixed administrator actions"]
         N["Persistent notifications<br/>operation results"]
-        D["Optional operations dashboard<br/>planned, read-only"]
+        D["Optional operations dashboard<br/>available, read-only"]
     end
 
     C --> S
     C --> E
     A -->|"administrator request"| C
     C --> N
-    E -.->|"future display template"| D
+    E -.->|"native display template"| D
 
     C <-->|"signed files through the controller-owned<br/>private SSH bridge"| X["External HI Lab Controller<br/>supervised mailbox watcher"]
 
@@ -76,9 +76,35 @@ flowchart LR
 ```
 
 The companion supplies the native Home Assistant configuration flow, entities,
-actions, and operation notifications. It does not currently bundle a dashboard. A
-future optional dashboard template will display these entities only; it will not make
-deployment decisions or create another control path.
+actions, and operation notifications. It also includes an optional read-only operations
+dashboard at [`dashboards/hi-lab-operations.yaml`](dashboards/hi-lab-operations.yaml).
+The dashboard uses only built-in Home Assistant cards and the eleven native companion
+entities. It does not call an action, reconstruct controller decisions, or create
+another control path. Public-facing validation names describe **Integration health**
+and **Runtime truth**; the underlying Stage B and Stage 3 attribute identities remain
+unchanged for compatibility.
+
+## Optional operations dashboard
+
+![Illustrative public-safe preview of the HI Lab operations dashboard](docs/images/hi-lab-operations-dashboard.svg)
+
+The responsive **Operations** view gives feed integrity, readiness, deployment
+lifecycle, lock, baseline, validation, outcome, queue, and restart truth a calm
+maintainer-facing hierarchy. A separate **Evidence** view keeps exact attributes close
+without overwhelming the operational glance. The dashboard maps explicit controller
+state values to presentational colours; the displayed raw state remains authoritative.
+Green marks an expected or clear state for that tile, amber flags attention, and red
+marks blocked, invalid, stale, degraded, or unavailable truth. Cyan, teal, and
+blue-grey identity, timestamp, and disabled-state tiles are neutral evidence—not
+healthy verdicts. Active deployment, pending deployment, and accepted baseline remain
+separate facts, and unavailable state never appears healthy.
+
+Import the raw YAML as a new dashboard after the integration has registered
+its entities. Home Assistant may assign different entity IDs after an operator rename;
+in that case, replace the documented defaults with the matching eleven registered
+entities. Full import, compatibility, verification, and removal instructions are in
+[Using the companion](docs/USING_THE_COMPANION.md#install-the-optional-read-only-dashboard),
+with a compact index in the [optional dashboard gallery](dashboards/README.md).
 
 ## Fixed actions
 

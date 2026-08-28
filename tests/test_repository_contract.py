@@ -94,6 +94,68 @@ class RepositoryContractTests(unittest.TestCase):
         width, height = struct.unpack(">II", payload[16:24])
         self.assertEqual((width, height), (256, 256))
 
+    def test_optional_dashboard_uses_only_the_eleven_native_entities(self) -> None:
+        dashboard = (ROOT / "dashboards" / "hi-lab-operations.yaml").read_text(
+            encoding="utf-8"
+        )
+        entities = set(
+            re.findall(
+                r"(?:binary_sensor|sensor)\.hi_lab_controller_[a-z0-9_]+",
+                dashboard,
+            )
+        )
+        self.assertEqual(
+            entities,
+            {
+                "sensor.hi_lab_controller_feed",
+                "sensor.hi_lab_controller_last_contact",
+                "sensor.hi_lab_controller_readiness",
+                "sensor.hi_lab_controller_active_deployment",
+                "sensor.hi_lab_controller_pending_deployment",
+                "sensor.hi_lab_controller_mutation_lock",
+                "sensor.hi_lab_controller_accepted_baseline",
+                "sensor.hi_lab_controller_last_validation",
+                "sensor.hi_lab_controller_last_outcome",
+                "sensor.hi_lab_controller_prepare_queue",
+                "binary_sensor.hi_lab_controller_restart_required",
+            },
+        )
+        self.assertNotIn("custom:", dashboard)
+        self.assertNotRegex(
+            dashboard,
+            r"(?m)^\s*(?:tap_action|hold_action|double_tap_action|service|action):",
+        )
+        self.assertEqual(dashboard.count("path: hi-lab-controller\n"), 1)
+        self.assertEqual(dashboard.count("path: hi-lab-controller-evidence\n"), 1)
+        self.assertEqual(dashboard.count("layout: responsive"), 2)
+        for color in ("green", "amber", "red"):
+            self.assertIn(f"color: {color}", dashboard)
+        for state in (
+            "stale",
+            "missing",
+            "invalid_signature",
+            "schema_mismatch",
+            "clock_invalid",
+            "BLOCKED",
+            "UNAVAILABLE",
+            "DISABLED",
+        ):
+            self.assertIn(state, dashboard)
+
+    def test_dashboard_preview_is_public_safe_and_labelled(self) -> None:
+        preview = (
+            ROOT / "docs" / "images" / "hi-lab-operations-dashboard.svg"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Illustrative public-safe preview", preview)
+        self.assertIn(
+            "actual Home Assistant appearance follows the installed theme", preview
+        )
+        self.assertNotIn("/" + "Users" + "/", preview)
+        self.assertNotIn("homeassistant" + ".local", preview)
+        gallery = (ROOT / "dashboards" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("hi-lab-operations.yaml", gallery)
+        self.assertIn("no administrator", gallery)
+
     def test_public_text_contains_no_local_identity_or_secret_value(self) -> None:
         forbidden = (
             "/" + "Users" + "/",

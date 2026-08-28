@@ -1,0 +1,930 @@
+title: HI Lab Controller
+views:
+  - title: Operations
+    path: hi-lab-controller
+    icon: mdi:shield-home-outline
+    show_icon_and_title: true
+    type: sections
+    max_columns: 3
+    header:
+      layout: responsive
+      badges_position: bottom
+      card:
+        type: markdown
+        content: |
+          # HI Lab Controller
+
+          **A calm, read-only view of controller truth.** Green marks an expected or
+          clear state for that tile, amber needs attention, and red is blocked,
+          invalid, stale, or unavailable. No tile colour declares overall health.
+    sections:
+      - type: grid
+        background:
+          color: "#0b2942"
+          opacity: 18
+        cards:
+          - type: heading
+            heading: System pulse
+            heading_style: title
+            icon: mdi:heart-pulse
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_feed
+                state: fresh
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_feed
+              name: Signed feed
+              icon: mdi:shield-check-outline
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_feed
+                state_not: fresh
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_feed
+              name: Signed feed
+              icon: mdi:shield-alert-outline
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_readiness
+                state: READY
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_readiness
+              name: Controller
+              icon: mdi:check-decagram-outline
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_readiness
+                state: BLOCKED
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_readiness
+              name: Controller
+              icon: mdi:alert-decagram-outline
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_readiness
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_readiness
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_readiness
+              name: Controller truth
+              icon: mdi:alert-decagram-outline
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_mutation_lock
+                state: CLEAR
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_mutation_lock
+              name: Mutation lock
+              icon: mdi:lock-open-check-outline
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_mutation_lock
+                state: HELD
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_mutation_lock
+              name: Mutation lock
+              icon: mdi:lock-clock
+              color: amber
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_mutation_lock
+                state_not: CLEAR
+              - condition: state
+                entity: sensor.hi_lab_controller_mutation_lock
+                state_not: HELD
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_mutation_lock
+              name: Mutation lock
+              icon: mdi:lock-alert-outline
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: "off"
+            card:
+              type: tile
+              entity: binary_sensor.hi_lab_controller_restart_required
+              name: Restart
+              icon: mdi:restart-off
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: "on"
+            card:
+              type: tile
+              entity: binary_sensor.hi_lab_controller_restart_required
+              name: Restart
+              icon: mdi:restart-alert
+              color: amber
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: unavailable
+            card:
+              type: tile
+              entity: binary_sensor.hi_lab_controller_restart_required
+              name: Restart truth
+              icon: mdi:restart-alert
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: tile
+            entity: sensor.hi_lab_controller_last_contact
+            name: Historical last valid contact
+            icon: mdi:clock-check-outline
+            color: teal
+            state_content: state
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_feed
+                state_not: fresh
+            card:
+              type: markdown
+              title: Feed needs attention
+              content: |
+                Controller truth is not available while **Feed** is not `fresh`.
+
+                - Current feed: `{{ states('sensor.hi_lab_controller_feed') }}`
+                - Error: `{{ state_attr('sensor.hi_lab_controller_feed', 'error_code') or 'none reported' }}`
+
+                `stale`, `missing`, `invalid_signature`, `schema_mismatch`,
+                `clock_invalid`, `unknown`, and `unavailable` remain distinct.
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_readiness
+                state: BLOCKED
+            card:
+              type: markdown
+              title: Controller is blocked
+              content: |
+                - Blockers: `{{ state_attr('sensor.hi_lab_controller_readiness', 'blocker_codes') }}`
+                - Overflow: `{{ state_attr('sensor.hi_lab_controller_readiness', 'overflow_count') }}`
+
+                Resolve these in the external controller workflow. This surface cannot clear them.
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_mutation_lock
+                state_not: CLEAR
+            card:
+              type: markdown
+              title: Mutation lock is not clear
+              content: |
+                - State: `{{ states('sensor.hi_lab_controller_mutation_lock') }}`
+                - Owner: `{{ state_attr('sensor.hi_lab_controller_mutation_lock', 'owner_kind') or 'none reported' }}`
+                - Deployment: `{{ state_attr('sensor.hi_lab_controller_mutation_lock', 'deployment_id') or 'none reported' }}`
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: "on"
+            card:
+              type: markdown
+              title: Restart required
+              content: |
+                The controller reports a restart requirement for the exact pending lifecycle.
+                This is evidence, **not permission to restart**.
+
+                - Deployment: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'deployment_id') or 'none reported' }}`
+                - Reason: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'reason_code') or 'none reported' }}`
+                - Approved: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'approved') }}`
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: unavailable
+            card:
+              type: markdown
+              title: Restart truth unavailable
+              content: |
+                No durable controller restart fact is available. Do not read this as
+                restart-not-required.
+
+      - type: grid
+        background:
+          color: "#22c2c9"
+          opacity: 9
+        cards:
+          - type: heading
+            heading: Deployment lifecycle
+            heading_style: title
+            icon: mdi:package-variant-closed
+
+          - type: markdown
+            content: |
+              ## Three separate facts
+
+              Active, pending, and accepted baseline are independent. The dashboard
+              never infers acceptance from matching identities.
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_active_deployment
+                state_not: none
+              - condition: state
+                entity: sensor.hi_lab_controller_active_deployment
+                state_not: unknown
+              - condition: state
+                entity: sensor.hi_lab_controller_active_deployment
+                state_not: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_active_deployment
+              name: Active deployment
+              icon: mdi:package-variant-closed
+              color: cyan
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_active_deployment
+                state: none
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_active_deployment
+              name: No active deployment
+              icon: mdi:package-variant-remove
+              color: blue-grey
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_active_deployment
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_active_deployment
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_active_deployment
+              name: Active deployment truth
+              icon: mdi:package-variant-remove
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_pending_deployment
+                state: none
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_pending_deployment
+              name: Pending deployment
+              icon: mdi:package-variant-remove
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_pending_deployment
+                state_not: none
+              - condition: state
+                entity: sensor.hi_lab_controller_pending_deployment
+                state_not: unknown
+              - condition: state
+                entity: sensor.hi_lab_controller_pending_deployment
+                state_not: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_pending_deployment
+              name: Pending deployment
+              icon: mdi:package-variant
+              color: amber
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_pending_deployment
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_pending_deployment
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_pending_deployment
+              name: Pending truth
+              icon: mdi:package-variant-remove
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_accepted_baseline
+                state: none
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_accepted_baseline
+              name: Accepted baseline
+              icon: mdi:bookmark-minus-outline
+              color: amber
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_accepted_baseline
+                state_not: none
+              - condition: state
+                entity: sensor.hi_lab_controller_accepted_baseline
+                state_not: unknown
+              - condition: state
+                entity: sensor.hi_lab_controller_accepted_baseline
+                state_not: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_accepted_baseline
+              name: Accepted baseline
+              icon: mdi:bookmark-check-outline
+              color: green
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_accepted_baseline
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_accepted_baseline
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_accepted_baseline
+              name: Baseline truth
+              icon: mdi:bookmark-off-outline
+              color: red
+              vertical: true
+            grid_options:
+              columns: 6
+              rows: 2
+
+      - type: grid
+        background:
+          color: "#f0a000"
+          opacity: 9
+        cards:
+          - type: heading
+            heading: Outcome and queue
+            heading_style: title
+            icon: mdi:timeline-check-outline
+
+          - type: tile
+            entity: sensor.hi_lab_controller_last_validation
+            name: Validation completed at
+            icon: mdi:timeline-clock-outline
+            color: blue-grey
+
+          - type: entities
+            title: Reported validation checks
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: installed_identity
+                name: Installed identity
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_b_verdict
+                name: Integration health
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_3_verdict
+                name: Runtime truth
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: ACTIVE
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: NO_CHANGE_EQUIVALENT_PACKAGE
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_last_outcome
+              name: Last terminal outcome
+              icon: mdi:check-circle-outline
+              color: green
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: RESTORED_PRE_ACTIVATION
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: ROLLED_BACK
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_last_outcome
+              name: Last terminal outcome
+              icon: mdi:restore-alert
+              color: amber
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: BLOCKED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: FAILED_ACTIVATION
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: FAILED_PRE_DEPLOY
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: RECOVERY_REQUIRED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_last_outcome
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_last_outcome
+              name: Last terminal outcome
+              icon: mdi:alert-circle-outline
+              color: red
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_last_outcome
+                state: DISCARDED
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_last_outcome
+              name: Last terminal outcome
+              icon: mdi:package-variant-remove
+              color: blue-grey
+
+          - type: heading
+            heading: Prepare queue
+            heading_style: subtitle
+            icon: mdi:tray-full
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_prepare_queue
+                state: DISABLED
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_prepare_queue
+              name: Safe default
+              icon: mdi:tray-remove
+              color: blue-grey
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_prepare_queue
+                state: EMPTY
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_prepare_queue
+              name: Prepare queue
+              icon: mdi:tray
+              color: green
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: WAITING
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: FULL
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_prepare_queue
+              name: Prepare queue
+              icon: mdi:tray-full
+              color: amber
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: BLOCKED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: DEGRADED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: UNAVAILABLE
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: unknown
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: unavailable
+            card:
+              type: tile
+              entity: sensor.hi_lab_controller_prepare_queue
+              name: Prepare queue
+              icon: mdi:tray-alert
+              color: red
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.hi_lab_controller_prepare_queue
+                state: DISABLED
+            card:
+              type: markdown
+              content: |
+                **Disabled is the controller-owned safe default.** It is not a fault
+                and does not mean a request is waiting.
+
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: BLOCKED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: DEGRADED
+                  - condition: state
+                    entity: sensor.hi_lab_controller_prepare_queue
+                    state: UNAVAILABLE
+            card:
+              type: markdown
+              title: Queue needs attention
+              content: |
+                The controller reports `{{ states('sensor.hi_lab_controller_prepare_queue') }}`.
+                This surface cannot retry, cancel, claim, dispatch, or enable work.
+
+          - type: markdown
+            content: |
+              ### Control boundary
+
+              The companion's eight administrator actions remain in the dedicated
+              operator workflow. They are intentionally absent here so a status glance
+              cannot become an accidental mutation path.
+
+  - title: Evidence
+    path: hi-lab-controller-evidence
+    icon: mdi:text-box-search-outline
+    show_icon_and_title: true
+    type: sections
+    max_columns: 3
+    header:
+      layout: responsive
+      badges_position: bottom
+      card:
+        type: markdown
+        content: |
+          # Controller evidence
+
+          Selected exact controller-authored attributes for verification and diagnosis.
+          Return to **Operations** for the responsive status overview.
+    sections:
+      - type: grid
+        background:
+          color: "#0b2942"
+          opacity: 15
+        cards:
+          - type: heading
+            heading: Feed and deployment identity
+            icon: mdi:shield-search
+
+          - type: entities
+            title: Feed evidence
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_feed
+                attribute: observed_schema_major
+                name: Observed schema major
+              - type: attribute
+                entity: sensor.hi_lab_controller_feed
+                attribute: supported_schema_majors
+                name: Supported schema majors
+              - type: attribute
+                entity: sensor.hi_lab_controller_feed
+                attribute: state_revision
+                name: Status revision
+              - type: attribute
+                entity: sensor.hi_lab_controller_feed
+                attribute: generated_at
+                name: Generated at
+              - type: attribute
+                entity: sensor.hi_lab_controller_feed
+                attribute: expires_at
+                name: Expires at
+
+          - type: entities
+            title: Active identity
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_active_deployment
+                attribute: profile
+                name: Profile
+              - type: attribute
+                entity: sensor.hi_lab_controller_active_deployment
+                attribute: manifest_version
+                name: Manifest version
+              - type: attribute
+                entity: sensor.hi_lab_controller_active_deployment
+                attribute: verified_at
+                name: Verified at
+              - type: attribute
+                entity: sensor.hi_lab_controller_active_deployment
+                attribute: accepted_baseline
+                name: Accepted-baseline flag
+
+          - type: entities
+            title: Pending identity
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_pending_deployment
+                attribute: state
+                name: Lifecycle state
+              - type: attribute
+                entity: sensor.hi_lab_controller_pending_deployment
+                attribute: profile
+                name: Profile
+              - type: attribute
+                entity: sensor.hi_lab_controller_pending_deployment
+                attribute: manifest_version
+                name: Manifest version
+              - type: attribute
+                entity: sensor.hi_lab_controller_pending_deployment
+                attribute: previous_deployment_id
+                name: Predecessor
+              - type: attribute
+                entity: sensor.hi_lab_controller_pending_deployment
+                attribute: updated_at
+                name: Updated at
+
+          - type: entities
+            title: Baseline evidence
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_accepted_baseline
+                attribute: target_slot
+                name: Target slot
+              - type: attribute
+                entity: sensor.hi_lab_controller_accepted_baseline
+                attribute: profile
+                name: Profile
+              - type: attribute
+                entity: sensor.hi_lab_controller_accepted_baseline
+                attribute: manifest_version
+                name: Manifest version
+              - type: attribute
+                entity: sensor.hi_lab_controller_accepted_baseline
+                attribute: accepted_at
+                name: Accepted at
+
+      - type: grid
+        background:
+          color: "#22c2c9"
+          opacity: 8
+        cards:
+          - type: heading
+            heading: Readiness and result
+            icon: mdi:clipboard-text-search-outline
+
+          - type: entities
+            title: Readiness evidence
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_readiness
+                attribute: state_revision
+                name: Status revision
+              - type: attribute
+                entity: sensor.hi_lab_controller_mutation_lock
+                attribute: owner_kind
+                name: Lock owner kind
+              - type: attribute
+                entity: sensor.hi_lab_controller_mutation_lock
+                attribute: held_at
+                name: Lock held at
+
+          - type: entities
+            title: Validation evidence
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: deployment_id
+                name: Deployment
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_b_passed
+                name: Integration services available
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_b_expected
+                name: Integration services required
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_3_passed
+                name: Runtime entities healthy
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_3_expected
+                name: Runtime entities expected
+
+          - type: entities
+            title: Outcome evidence
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_outcome
+                attribute: deployment_id
+                name: Deployment
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_outcome
+                attribute: profile
+                name: Profile
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_outcome
+                attribute: completed_at
+                name: Completed at
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_outcome
+                attribute: error_codes
+                name: Error codes
+
+      - type: grid
+        background:
+          color: "#f0a000"
+          opacity: 8
+        cards:
+          - type: heading
+            heading: Queue evidence
+            icon: mdi:tray-full
+
+          - type: entities
+            title: Bounded prepare queue
+            show_header_toggle: false
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_prepare_queue
+                attribute: enabled
+                name: Enabled
+              - type: attribute
+                entity: sensor.hi_lab_controller_prepare_queue
+                attribute: depth
+                name: Depth
+              - type: attribute
+                entity: sensor.hi_lab_controller_prepare_queue
+                attribute: max_depth
+                name: Maximum depth
+              - type: attribute
+                entity: sensor.hi_lab_controller_prepare_queue
+                attribute: entries
+                name: Bounded entries
+
+          - type: markdown
+            content: |
+              Queue truth is evidence only. Enablement, admission, cancellation, claim,
+              dispatch, restart, and acceptance remain separate controller-governed steps.

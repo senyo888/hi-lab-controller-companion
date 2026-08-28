@@ -49,6 +49,24 @@ HACS may download and replace the integration files. It does not authorize a Hom
 Assistant restart, prove that updated Python is active, validate the external
 controller, or accept a runtime baseline. Those remain separate evidence-backed steps.
 
+## Optional dashboard surface
+
+`dashboards/hi-lab-operations.yaml` is a manually imported, read-only Home Assistant
+dashboard template. Its responsive Operations view uses a semantic green/amber/red
+status language and its separate Evidence view retains selected exact controller
+attributes.
+Both use core Home Assistant cards and only the eleven entities and documented
+attributes owned by this integration. Conditional presentation maps direct entity
+states to explicit expected/clear, attention, and degraded wording; it does not
+recompute readiness, deployment, lock, validation, baseline, queue, outcome, or
+restart truth.
+
+The dashboard contains no administrator actions or service calls and is not installed
+or mutated automatically. Its presence in this repository does not change the signed
+status `dashboard` capability, which remains controller-provided protocol truth, and
+does not add runtime, deployment, baseline, HACS, publication, or release authority.
+Removing the dashboard changes presentation only.
+
 ## Security and privacy
 
 Tracked files are public-safe. Shared secrets, target identities, mailbox contents,

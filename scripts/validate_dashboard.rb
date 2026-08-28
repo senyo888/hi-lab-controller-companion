@@ -1,0 +1,210 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "set"
+require "base64"
+require "yaml"
+
+root = File.expand_path("..", __dir__)
+dashboard_path = File.join(root, "dashboards", "hi-lab-operations.yaml")
+dashboard = YAML.safe_load(
+  File.read(dashboard_path, encoding: "UTF-8"),
+  permitted_classes: [],
+  permitted_symbols: [],
+  aliases: false,
+  filename: dashboard_path
+)
+
+def fail_contract(message)
+  warn "dashboard contract: #{message}"
+  exit 1
+end
+
+fail_contract("top level must be a mapping") unless dashboard.is_a?(Hash)
+fail_contract("title differs") unless dashboard["title"] == "HI Lab Controller"
+views = dashboard["views"]
+fail_contract("operations and evidence views are required") unless views.is_a?(Array) && views.length == 2
+view_paths = views.map { |view| view.is_a?(Hash) ? view["path"] : nil }
+fail_contract("view paths differ: #{view_paths.inspect}") unless view_paths == [
+  "hi-lab-controller", "hi-lab-controller-evidence"
+]
+views.each do |view|
+  fail_contract("every view must use sections") unless view["type"] == "sections"
+  fail_contract("every view must use a three-column responsive maximum") unless view["max_columns"] == 3
+  header = view["header"]
+  fail_contract("every view must have a responsive header") unless (
+    header.is_a?(Hash) && header["layout"] == "responsive"
+  )
+end
+
+expected_entities = Set[
+  "sensor.hi_lab_controller_feed",
+  "sensor.hi_lab_controller_last_contact",
+  "sensor.hi_lab_controller_readiness",
+  "sensor.hi_lab_controller_active_deployment",
+  "sensor.hi_lab_controller_pending_deployment",
+  "sensor.hi_lab_controller_mutation_lock",
+  "sensor.hi_lab_controller_accepted_baseline",
+  "sensor.hi_lab_controller_last_validation",
+  "sensor.hi_lab_controller_last_outcome",
+  "sensor.hi_lab_controller_prepare_queue",
+  "binary_sensor.hi_lab_controller_restart_required"
+]
+allowed_card_types = Set[
+  "sections", "grid", "heading", "markdown", "conditional", "tile", "entities", "attribute"
+]
+documented_attributes = {
+  "sensor.hi_lab_controller_feed" => Set[
+    "supported_schema_majors", "observed_schema_major", "error_code",
+    "controller_boot_id", "state_revision", "generated_at", "expires_at"
+  ],
+  "sensor.hi_lab_controller_last_contact" => Set["historical_only"],
+  "sensor.hi_lab_controller_readiness" => Set["blocker_codes", "overflow_count", "state_revision"],
+  "sensor.hi_lab_controller_active_deployment" => Set[
+    "profile", "manifest_version", "verified_at", "accepted_baseline"
+  ],
+  "sensor.hi_lab_controller_pending_deployment" => Set[
+    "state", "profile", "manifest_version", "previous_deployment_id", "created_at", "updated_at"
+  ],
+  "sensor.hi_lab_controller_mutation_lock" => Set["deployment_id", "owner_kind", "held_at"],
+  "sensor.hi_lab_controller_accepted_baseline" => Set[
+    "target_slot", "profile", "manifest_version", "accepted_at"
+  ],
+  "sensor.hi_lab_controller_last_validation" => Set[
+    "deployment_id", "installed_identity", "stage_b_verdict", "stage_b_passed",
+    "stage_b_expected", "stage_3_verdict", "stage_3_passed", "stage_3_expected"
+  ],
+  "sensor.hi_lab_controller_last_outcome" => Set[
+    "deployment_id", "profile", "completed_at", "error_codes"
+  ],
+  "sensor.hi_lab_controller_prepare_queue" => Set["enabled", "depth", "max_depth", "entries"],
+  "binary_sensor.hi_lab_controller_restart_required" => Set[
+    "deployment_id", "reason_code", "approved"
+  ]
+}.freeze
+
+entities = Set.new
+card_types = Set.new
+attribute_rows = []
+template_attributes = []
+forbidden_keys = Set["action", "service", "service_data", "tap_action", "hold_action", "double_tap_action"]
+semantic_tiles = {}
+
+positive_states = lambda do |conditions, found = []|
+  Array(conditions).each do |condition|
+    next unless condition.is_a?(Hash)
+
+    if condition["condition"] == "state" && condition["entity"].is_a?(String) && condition.key?("state")
+      found << [condition["entity"], condition["state"]]
+    elsif %w[and or].include?(condition["condition"])
+      positive_states.call(condition["conditions"], found)
+    end
+  end
+  found
+end
+
+walk = lambda do |value|
+  case value
+  when Hash
+    if value["type"] == "conditional" && value["card"].is_a?(Hash) && value["card"]["type"] == "tile"
+      color = value["card"]["color"]
+      positive_states.call(value["conditions"]).each do |entity, state|
+        semantic_tiles[[entity, state]] = color
+      end
+    end
+    value.each do |key, child|
+      fail_contract("interactive or service key #{key.inspect} is forbidden") if forbidden_keys.include?(key)
+      card_types << child if key == "type" && child.is_a?(String)
+      entities << child if key == "entity" && child.is_a?(String)
+      walk.call(child)
+    end
+    if value["type"] == "attribute"
+      attribute_rows << [value["entity"], value["attribute"]]
+    end
+  when Array
+    value.each { |child| walk.call(child) }
+  when String
+    value.scan(/(?:binary_sensor|sensor)\.hi_lab_controller_[a-z0-9_]+/) { |entity| entities << entity }
+    value.scan(/state_attr\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)/) do |entity, attribute|
+      template_attributes << [entity, attribute]
+    end
+  end
+end
+walk.call(dashboard)
+
+fail_contract("entity set differs: #{entities.to_a.sort.inspect}") unless entities == expected_entities
+unknown_types = card_types - allowed_card_types
+fail_contract("non-native card types found: #{unknown_types.to_a.sort.inspect}") unless unknown_types.empty?
+
+(attribute_rows + template_attributes).each do |entity, attribute|
+  allowed = documented_attributes.fetch(entity) do
+    fail_contract("attribute reference uses unknown entity #{entity.inspect}")
+  end
+  fail_contract("undocumented attribute #{entity}.#{attribute}") unless allowed.include?(attribute)
+end
+
+raw = File.read(dashboard_path, encoding: "UTF-8")
+brand_path = File.join(root, "brand", "icon.png")
+preview_path = File.join(root, "docs", "images", "hi-lab-operations-dashboard.svg")
+preview = File.read(preview_path, encoding: "UTF-8")
+embedded_brand = preview.match(%r{data:image/png;base64,([A-Za-z0-9+/=]+)})
+fail_contract("official brand image is not embedded in the public preview") unless embedded_brand
+fail_contract("embedded public-preview brand image differs") unless (
+  Base64.strict_decode64(embedded_brand[1]) == File.binread(brand_path)
+)
+%w[stale missing invalid_signature schema_mismatch clock_invalid BLOCKED UNAVAILABLE DISABLED].each do |state|
+  fail_contract("required degraded-state truth #{state.inspect} is absent") unless raw.include?(state)
+end
+%w[green amber red].each do |color|
+  fail_contract("required semantic color #{color.inspect} is absent") unless raw.include?("color: #{color}")
+end
+expected_semantic_tiles = {
+  ["sensor.hi_lab_controller_feed", "fresh"] => "green",
+  ["sensor.hi_lab_controller_readiness", "READY"] => "green",
+  ["sensor.hi_lab_controller_readiness", "BLOCKED"] => "red",
+  ["sensor.hi_lab_controller_readiness", "unknown"] => "red",
+  ["sensor.hi_lab_controller_readiness", "unavailable"] => "red",
+  ["sensor.hi_lab_controller_mutation_lock", "CLEAR"] => "green",
+  ["sensor.hi_lab_controller_mutation_lock", "HELD"] => "amber",
+  ["binary_sensor.hi_lab_controller_restart_required", "off"] => "green",
+  ["binary_sensor.hi_lab_controller_restart_required", "on"] => "amber",
+  ["binary_sensor.hi_lab_controller_restart_required", "unavailable"] => "red",
+  ["sensor.hi_lab_controller_active_deployment", "none"] => "blue-grey",
+  ["sensor.hi_lab_controller_active_deployment", "unknown"] => "red",
+  ["sensor.hi_lab_controller_active_deployment", "unavailable"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "ACTIVE"] => "green",
+  ["sensor.hi_lab_controller_last_outcome", "NO_CHANGE_EQUIVALENT_PACKAGE"] => "green",
+  ["sensor.hi_lab_controller_last_outcome", "RESTORED_PRE_ACTIVATION"] => "amber",
+  ["sensor.hi_lab_controller_last_outcome", "ROLLED_BACK"] => "amber",
+  ["sensor.hi_lab_controller_last_outcome", "DISCARDED"] => "blue-grey",
+  ["sensor.hi_lab_controller_last_outcome", "BLOCKED"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "FAILED_ACTIVATION"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "FAILED_PRE_DEPLOY"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "RECOVERY_REQUIRED"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "unknown"] => "red",
+  ["sensor.hi_lab_controller_last_outcome", "unavailable"] => "red",
+  ["sensor.hi_lab_controller_prepare_queue", "DISABLED"] => "blue-grey",
+  ["sensor.hi_lab_controller_prepare_queue", "EMPTY"] => "green",
+  ["sensor.hi_lab_controller_prepare_queue", "WAITING"] => "amber",
+  ["sensor.hi_lab_controller_prepare_queue", "FULL"] => "amber",
+  ["sensor.hi_lab_controller_prepare_queue", "BLOCKED"] => "red",
+  ["sensor.hi_lab_controller_prepare_queue", "DEGRADED"] => "red",
+  ["sensor.hi_lab_controller_prepare_queue", "UNAVAILABLE"] => "red"
+}.freeze
+expected_semantic_tiles.each do |key, expected_color|
+  actual_color = semantic_tiles[key]
+  fail_contract("semantic tile #{key.join('=')} must be #{expected_color}, got #{actual_color.inspect}") unless (
+    actual_color == expected_color
+  )
+end
+fail_contract("custom cards are forbidden") if raw.include?("custom:")
+fail_contract("historical contact must not use Home Assistant last_updated") if raw.include?("last_updated")
+["Integration health", "Runtime truth"].each do |public_name|
+  fail_contract("public validation name #{public_name.inspect} is absent") unless raw.include?(public_name)
+end
+
+puts(
+  "dashboard contract: PASS " \
+  "(#{entities.length} entities, #{attribute_rows.length} attribute rows, " \
+  "#{template_attributes.length} template attribute references)"
+)

@@ -21,6 +21,8 @@ jobs:
           python-version: "3.x"
       - name: Unit and repository-contract tests
         run: python -m unittest discover -s tests -v
+      - name: Validate optional dashboard schema and truth contract
+        run: ruby scripts/validate_dashboard.rb
       - name: Compile Python
         run: python -m compileall -q custom_components tests
       - name: Install Gitleaks

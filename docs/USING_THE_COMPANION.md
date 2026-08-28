@@ -16,9 +16,13 @@ HACS installs one Home Assistant custom integration:
 - persistent notifications for important prepare, queue, activate, discard, and
   rollback results.
 
-There is no custom panel or dashboard in the current release. A future optional
-dashboard template may present the native entities, but it must remain read-only and
-must not duplicate controller logic.
+The repository includes an optional read-only dashboard template. Its responsive
+Operations view maps explicit controller states to green, amber, and red presentation,
+while a separate Evidence view retains selected exact attributes. Raw entity state
+remains authoritative; neutral cyan, teal, and blue-grey tiles do not assert health.
+The template uses the eleven native entities and built-in Home Assistant cards only.
+It is not installed automatically, contains no action controls, and does not duplicate
+controller logic.
 
 ## Authority boundary
 
@@ -115,7 +119,7 @@ operator renames it; the integration's unique IDs remain fixed.
 | `sensor.hi_lab_controller_pending_deployment` | Exact in-progress deployment | Shows a deployment ID or `none`, with lifecycle state, profile, manifest version, predecessor, and timestamps. It becomes unavailable on a lock-identity conflict. |
 | `sensor.hi_lab_controller_mutation_lock` | Whether controller mutation is safely serialized | `CLEAR`, `HELD`, `CONFLICT`, or `UNVERIFIED`, with the owning deployment and lock evidence where available. Do not start mutation work unless the controller permits it. |
 | `sensor.hi_lab_controller_accepted_baseline` | Last separately accepted deployment baseline | Shows a deployment ID or `none`, with target slot, profile, version, and acceptance time. Active deployment and accepted baseline are intentionally different facts. |
-| `sensor.hi_lab_controller_last_validation` | Completion time of the latest controller validation | Attributes contain the deployment and installed identity plus Stage B and Stage 3 pass counts and verdicts. It reports evidence; it does not accept a baseline. |
+| `sensor.hi_lab_controller_last_validation` | Completion time of the latest controller validation | Attributes contain the deployment and installed identity plus **Integration health** (technical Stage B) and **Runtime truth** (technical Stage 3) counts and verdicts. It reports evidence; it does not accept a baseline. |
 | `sensor.hi_lab_controller_last_outcome` | Latest terminal controller outcome | Examples include `ACTIVE`, `BLOCKED`, `FAILED_ACTIVATION`, `RESTORED_PRE_ACTIVATION`, and `ROLLED_BACK`. Attributes identify the deployment, profile, completion time, and bounded error codes. |
 | `sensor.hi_lab_controller_prepare_queue` | Phase 4D prepare-queue state | `DISABLED`, `EMPTY`, `WAITING`, `FULL`, `BLOCKED`, `DEGRADED`, or `UNAVAILABLE`, with enabled state, depth, maximum depth, and bounded entries. The queue remains controller-owned and default-off unless separately enabled. |
 | `binary_sensor.hi_lab_controller_restart_required` | Whether the exact pending lifecycle requires a restart | On or off only when durable controller restart truth is available. Attributes identify the deployment, reason, and approval. It is not permission to restart by itself. |
@@ -217,20 +221,87 @@ HACS rollback changes the companion package only. It does not roll back an exter
 controller deployment. The controller's separate recovery bootstrap remains a
 maintainer-governed recovery route, not the normal HACS update path.
 
-## Optional dashboard direction
+## Install the optional read-only dashboard
 
-The intended dashboard is a presentation layer over the eleven native entities. It
-may group feed integrity, readiness, deployment state, queue state, validation,
-baseline, and restart truth into an operator-friendly view. It must:
+The template at [`dashboards/hi-lab-operations.yaml`](../dashboards/hi-lab-operations.yaml)
+is an optional presentation surface. It uses only core **Sections**, **Heading**,
+**Markdown**, **Conditional**, **Tile**, and **Entities** cards and native attribute
+rows. It has no custom-card, theme, JavaScript, network, or controller dependency
+beyond the companion's eleven native entities.
 
-- remain optional and read-only by default;
-- use entity states and attributes rather than reproducing controller logic;
-- make stale, missing, invalid, blocked, and unaccepted states visually explicit;
-- avoid embedding private target identities, credentials, or machine-specific paths;
-- keep mutation actions out of casual controls; and
-- never imply that a download, restart, active deployment, observation, accepted
-  baseline, publication, or release has occurred without controller-owned evidence.
+### Import as a new dashboard
 
-Until that template is separately designed and validated, use the native device page,
-entity details, Developer Tools actions, and controller evidence as the supported
-surface.
+1. Complete companion installation and confirm all eleven entities exist.
+2. In Home Assistant, open **Settings → Dashboards** and create a new dashboard in
+   storage mode. On the dedicated private HA Lab, make the dashboard **Admin only**;
+   its Evidence view contains live operational identities and diagnostics.
+3. Open the new dashboard, choose **Edit dashboard → three-dot menu → Raw
+   configuration editor**.
+4. Copy the complete contents of
+   [`dashboards/hi-lab-operations.yaml`](../dashboards/hi-lab-operations.yaml), replace
+   the editor contents, save, and reload the dashboard once.
+5. If Home Assistant changed an entity ID after an operator rename, replace each
+   documented default ID with the matching registered entity. Do not substitute a
+   helper, template sensor, or controller-private identity.
+
+The template uses responsive Sections headers, section backgrounds, native Tile colors,
+and card grid sizing. **Use Home Assistant 2026.4 or newer for the template exactly as
+shipped; 2026.4 introduced section backgrounds.** Earlier frontends are outside this
+template's validated presentation contract. It follows the installed Home Assistant
+theme; the navy, teal, and amber
+[public preview](images/hi-lab-operations-dashboard.svg) is an illustrative identity
+concept, not an imported Home Assistant screenshot or a promise of pixel-identical
+rendering under every theme and viewport.
+
+The integration bundles its official controller mark under `brand/`, so Home Assistant
+2026.3 and newer can use it on integration and device surfaces. The dashboard keeps
+native MDI state icons because Lovelace YAML cannot portably request the authenticated
+brand image endpoint; it does not substitute an unofficial dashboard logo or add a
+remote image dependency. The public preview uses the bundled official mark.
+
+Home Assistant view visibility is presentation, not an access-control boundary: a
+hidden view can still be reached by direct URL. Keep dashboard access Admin only and
+do not publish or share screenshots, exports, or raw YAML captured from the live
+**Evidence** view. The repository preview uses synthetic public-safe identities only.
+
+### Verify truth and responsive layout
+
+After import:
+
+1. Compare every tile with **Settings → Devices & services → HI Lab Controller**.
+   Exactly the same eleven entities should appear; no helper or derived entity is
+   required.
+2. Confirm the **Operations** view uses green only for an expected or clear state on
+   that tile, amber for attention or incomplete lifecycle acceptance, and red for
+   stale, invalid, blocked, degraded, or unavailable truth. Cyan, teal, and blue-grey
+   are neutral evidence colours. No tile colour declares overall health. Colour is a
+   second signal; text, state, and icon must remain understandable without colour.
+3. Confirm a non-`fresh` **Feed** shows the feed-attention card and its exact raw state.
+   `stale`, `missing`, `invalid_signature`, `schema_mismatch`, `clock_invalid`,
+   `unknown`, and `unavailable` must not look healthy.
+4. Confirm `BLOCKED` readiness, a non-`CLEAR` mutation lock, an unavailable restart
+   fact, and `BLOCKED`, `DEGRADED`, `UNAVAILABLE`, and `DISABLED` queue states remain
+   visibly distinct. `DISABLED` is the blue-grey safe default rather than a fault.
+5. Confirm **Active deployment**, **Pending deployment**, and **Accepted baseline** are
+   displayed separately. The dashboard must not infer baseline acceptance by comparing
+   identities.
+6. Check both **Operations** and **Evidence** at desktop and mobile widths. Operations
+   should reflow without horizontal scrolling; Evidence attribute rows may wrap but
+   must remain readable. This check remains release evidence until the exact YAML is
+   imported and rendered in Home Assistant.
+7. Open the raw configuration again and confirm there is no `custom:` card, action,
+   service, tap action, hold action, or double-tap action.
+
+The Markdown and conditional cards only present direct entity states and documented
+attributes. They do not decide readiness, validate a deployment, resolve a lock,
+approve a restart, dispatch queue work, or accept a baseline. Administrator actions
+remain separately documented under [The eight administrator actions](#the-eight-administrator-actions)
+and are intentionally absent from the dashboard.
+
+### Remove or roll back the dashboard
+
+Removing the dashboard or replacing its raw configuration affects presentation only.
+It does not unload the integration, change HACS ownership, call the controller, mutate
+Home Assistant runtime state, cancel work, restart Home Assistant, or change any
+deployment or baseline. Before editing an established view, save its current raw YAML
+so the presentation change can be reversed exactly.
