@@ -34,11 +34,7 @@
         "name": "Last contact"
       },
       "controller_readiness": {
-        "name": "Readiness",
-        "state": {
-          "READY": "Ready",
-          "BLOCKED": "Blocked"
-        }
+        "name": "Readiness"
       },
       "active_deployment": {
         "name": "Active deployment"
@@ -47,13 +43,7 @@
         "name": "Pending deployment"
       },
       "mutation_lock": {
-        "name": "Mutation lock",
-        "state": {
-          "CLEAR": "Clear",
-          "HELD": "Held",
-          "CONFLICT": "Conflict",
-          "UNVERIFIED": "Unverified"
-        }
+        "name": "Mutation lock"
       },
       "accepted_baseline": {
         "name": "Accepted baseline"
@@ -62,31 +52,10 @@
         "name": "Last validation"
       },
       "last_outcome": {
-        "name": "Last outcome",
-        "state": {
-          "ACTIVE": "Active",
-          "BLOCKED": "Blocked",
-          "DISCARDED": "Discarded",
-          "FAILED_ACTIVATION": "Activation failed",
-          "FAILED_PRE_DEPLOY": "Pre-deployment failed",
-          "NO_CHANGE_EQUIVALENT_PACKAGE": "No change, equivalent package",
-          "RECOVERY_REQUIRED": "Recovery required",
-          "RESTORED_PRE_ACTIVATION": "Restored before activation",
-          "ROLLED_BACK": "Rolled back",
-          "unknown": "Unknown"
-        }
+        "name": "Last outcome"
       },
       "prepare_queue": {
-        "name": "Prepare queue",
-        "state": {
-          "DISABLED": "Disabled",
-          "EMPTY": "Empty",
-          "WAITING": "Waiting",
-          "FULL": "Full",
-          "BLOCKED": "Blocked",
-          "DEGRADED": "Degraded",
-          "UNAVAILABLE": "Unavailable"
-        }
+        "name": "Prepare queue"
       }
     },
     "binary_sensor": {

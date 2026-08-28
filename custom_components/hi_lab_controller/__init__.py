@@ -35,6 +35,7 @@ PROFILE_SCHEMA = vol.Schema(
 )
 DEPLOYMENT_SCHEMA = vol.Schema({vol.Required("deployment_id"): cv.string})
 QUEUE_SCHEMA = vol.Schema({vol.Required("queue_id"): cv.string})
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 @dataclass(frozen=True)

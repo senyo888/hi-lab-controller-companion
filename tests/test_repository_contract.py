@@ -73,6 +73,12 @@ class RepositoryContractTests(unittest.TestCase):
             (COMPONENT / "translations" / "en.json").read_text(encoding="utf-8")
         )
         self.assertEqual(strings, english)
+        self.assertNotIn("state", strings["entity"]["sensor"]["controller_readiness"])
+        self.assertNotIn("state", strings["entity"]["sensor"]["last_outcome"])
+
+    def test_config_entry_only_schema_is_declared(self) -> None:
+        source = (COMPONENT / "__init__.py").read_text(encoding="utf-8")
+        self.assertIn("CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)", source)
 
     def test_brand_assets_are_identical_valid_pngs(self) -> None:
         root_icon = ROOT / "brand" / "icon.png"
