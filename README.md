@@ -5,6 +5,10 @@ It provides a narrow administrator-only action gateway and truthful diagnostic e
 for a dedicated HA Lab. It does not contain the external controller and does not install
 or control Humidity Intelligence by itself.
 
+> **Scope:** This is standalone maintainer-facing HA Lab tooling. It is not the
+> Humidity Intelligence integration, a required HI dependency, or an HI publication
+> and release channel.
+
 The external controller remains private while its design characteristics, security
 boundary, compatibility, and operational stability are completed. It is intended to
 become a separately published maintainer tool only after those release gates pass.
@@ -24,6 +28,57 @@ Automatic HACS updates are supported. Only maintainer-published releases are exp
 as normal update candidates; the default branch is hidden. Downloading an update does
 not prove restart completion, compatibility, runtime health, deployment acceptance, or
 any Humidity Intelligence release state.
+
+For prerequisites, activation, verification, entity meanings, action workflows,
+updates, and rollback, see [Using the companion](docs/USING_THE_COMPANION.md).
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    M["Maintainer"] --> H["HACS custom repository"]
+    H -->|"downloads a published release"| C["HI Lab Controller Companion<br/>inside the HA Lab"]
+
+    subgraph HA["Home Assistant — presentation and bounded requests"]
+        S["Settings → Devices & services<br/>configuration"]
+        E["11 native entities<br/>status and readiness"]
+        A["Developer Tools → Actions<br/>8 fixed administrator actions"]
+        N["Persistent notifications<br/>operation results"]
+        D["Optional operations dashboard<br/>planned, read-only"]
+    end
+
+    C --> S
+    C --> E
+    A -->|"administrator request"| C
+    C --> N
+    E -.->|"future display template"| D
+
+    C <-->|"signed files through the controller-owned<br/>private SSH bridge"| X["External HI Lab Controller<br/>supervised mailbox watcher"]
+
+    subgraph CP["External control plane — authority and evidence"]
+        X --> P["Source selection and packaging"]
+        X --> Q["Queue and deployment state"]
+        X --> R["SSH, validation, and evidence"]
+    end
+
+    B["Boundary: the companion presents controller truth;<br/>it has no Git, SSH, package, or target authority"]
+    B --- C
+    B --- X
+
+    classDef companion fill:#0b2942,stroke:#22c2c9,color:#ffffff,stroke-width:2px;
+    classDef surface fill:#e9fbfb,stroke:#139ca5,color:#0b2942;
+    classDef authority fill:#fff4dc,stroke:#f0a000,color:#0b2942;
+    classDef boundary fill:#f6f8fa,stroke:#6e7781,color:#24292f,stroke-dasharray: 5 4;
+    class C companion;
+    class S,E,A,N,D surface;
+    class X,P,Q,R authority;
+    class B boundary;
+```
+
+The companion supplies the native Home Assistant configuration flow, entities,
+actions, and operation notifications. It does not currently bundle a dashboard. A
+future optional dashboard template will display these entities only; it will not make
+deployment decisions or create another control path.
 
 ## Fixed actions
 
@@ -45,6 +100,11 @@ controller-owned and fail-closed when disabled.
 The integration registers ten sensors and one binary sensor. It accepts signed status
 schema majors 1 and 2 and makes controller truth unavailable when the local snapshot is
 missing, stale, malformed, unsigned, permission-unsafe, or incompatible.
+
+The eleven entities cover feed health, last contact, controller readiness, active and
+pending deployment, mutation lock, accepted baseline, last validation, last outcome,
+prepare queue, and restart requirement. Their states and attributes are explained in
+[Using the companion](docs/USING_THE_COMPANION.md#the-eleven-entities).
 
 ## Boundaries
 

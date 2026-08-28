@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Added a public operator guide for HACS installation, activation, verification,
+  updates, rollback, all eleven native entities, and all eight administrator actions.
+- Added a README architecture diagram that distinguishes Home Assistant presentation
+  from external-controller authority, identifies the controller-owned private SSH
+  mailbox bridge, and labels the optional dashboard as planned.
+- Clarified that automatic HACS updates may remain enabled while restart, runtime
+  verification, controller deployment, and release authority stay separate.
+- No runtime, entity, action, protocol, or authority behavior changed.
+
 ## 0.4.1 - 2026-08-28
 
 - Established the companion as an independently versioned custom-HACS integration.
