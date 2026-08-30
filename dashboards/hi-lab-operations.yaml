@@ -218,17 +218,6 @@ views:
               columns: 6
               rows: 2
 
-          - type: tile
-            entity: sensor.hi_lab_controller_last_contact
-            name: Last valid controller contact
-            icon: mdi:clock-check-outline
-            color: teal
-            vertical: false
-            state_content: state
-            grid_options:
-              columns: 12
-              rows: 3
-
           - type: conditional
             conditions:
               - condition: state
@@ -273,6 +262,42 @@ views:
                 - Owner: `{{ state_attr('sensor.hi_lab_controller_mutation_lock', 'owner_kind') or 'none reported' }}`
                 - Deployment: `{{ state_attr('sensor.hi_lab_controller_mutation_lock', 'deployment_id') or 'none reported' }}`
 
+      - type: grid
+        background:
+          color: "#18334a"
+          opacity: 24
+        cards:
+          - type: heading
+            heading: Contact and restart
+            heading_style: title
+            icon: mdi:history
+
+          - type: tile
+            entity: sensor.hi_lab_controller_last_contact
+            name: Last valid controller contact
+            icon: mdi:clock-check-outline
+            color: teal
+            vertical: false
+            state_content: state
+            grid_options:
+              columns: 12
+              rows: 2
+
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: binary_sensor.hi_lab_controller_restart_required
+                state: "off"
+            card:
+              type: markdown
+              title: Restart not required
+              content: |
+                The controller currently reports no restart requirement. This is
+                evidence only, not standing restart authority.
+            grid_options:
+              columns: 12
+              rows: 2
+
           - type: conditional
             conditions:
               - condition: state
@@ -288,6 +313,9 @@ views:
                 - Deployment: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'deployment_id') or 'none reported' }}`
                 - Reason: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'reason_code') or 'none reported' }}`
                 - Approved: `{{ state_attr('binary_sensor.hi_lab_controller_restart_required', 'approved') }}`
+            grid_options:
+              columns: 12
+              rows: 4
 
           - type: conditional
             conditions:
@@ -300,6 +328,9 @@ views:
               content: |
                 No durable controller restart fact is available. Do not read this as
                 restart-not-required.
+            grid_options:
+              columns: 12
+              rows: 2
 
       - type: grid
         background:
@@ -317,6 +348,9 @@ views:
 
               Active, pending, and accepted baseline are independent. The dashboard
               never infers acceptance from matching identities.
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -436,6 +470,16 @@ views:
               columns: 6
               rows: 2
 
+      - type: grid
+        background:
+          color: "#123c43"
+          opacity: 22
+        cards:
+          - type: heading
+            heading: Baseline acceptance
+            heading_style: title
+            icon: mdi:database-check-outline
+
           - type: conditional
             conditions:
               - condition: state
@@ -494,6 +538,15 @@ views:
             grid_options:
               columns: 12
               rows: 3
+
+          - type: markdown
+            title: Acceptance boundary
+            content: |
+              Active, pending, and accepted baseline remain separate facts. A matching
+              identity is not acceptance unless the controller reports it here.
+            grid_options:
+              columns: 12
+              rows: 2
 
       - type: grid
         column_span: 2

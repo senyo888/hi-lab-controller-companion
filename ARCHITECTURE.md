@@ -52,9 +52,12 @@ controller, or accept a runtime baseline. Those remain separate evidence-backed 
 ## Optional dashboard surface
 
 `dashboards/hi-lab-operations.yaml` is a manually imported, read-only Home Assistant
-dashboard template. Its responsive Operations view uses a semantic green/amber/red
-status language and its separate Evidence view retains selected exact controller
-attributes.
+dashboard template. Its responsive Operations view uses a full-width header and two
+paired tablet rows: System pulse beside Contact and restart, then Deployment lifecycle
+beside Baseline acceptance. Those pairs collapse to an ordered single column at
+narrower widths. A semantic green/amber/red status language remains direct
+controller-authored presentation, while the separate Evidence view retains selected
+exact controller attributes.
 Both use core Home Assistant cards and only the eleven entities and documented
 attributes owned by this integration. Conditional presentation maps direct entity
 states to explicit expected/clear, attention, and degraded wording; it does not

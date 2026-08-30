@@ -151,6 +151,10 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertEqual(dashboard.count("dense_section_placement: false"), 2)
         self.assertEqual(dashboard.count("column_span: 2"), 2)
         self.assertIn("name: Last valid controller contact", dashboard)
+        self.assertIn("heading: Contact and restart", dashboard)
+        self.assertIn("heading: Baseline acceptance", dashboard)
+        self.assertIn("title: Restart truth unavailable", dashboard)
+        self.assertIn("title: Acceptance boundary", dashboard)
         self.assertIn("heading: Validation, outcome and queue", dashboard)
         self.assertIn("title: Evidence boundary", dashboard)
         self.assertEqual(dashboard.count("title: Queue context"), 1)
@@ -179,7 +183,15 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertIn(
             "actual Home Assistant appearance follows the installed theme", preview
         )
-        for surface_name in ("Operations", "Evidence", "Open Actions tool"):
+        for surface_name in (
+            "Operations",
+            "Evidence",
+            "SYSTEM PULSE",
+            "CONTACT AND RESTART",
+            "DEPLOYMENT LIFECYCLE",
+            "BASELINE ACCEPTANCE",
+            "Open Actions tool",
+        ):
             self.assertIn(surface_name, preview)
         self.assertNotIn("/" + "Users" + "/", preview)
         self.assertNotIn("homeassistant" + ".local", preview)

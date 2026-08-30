@@ -7,11 +7,11 @@
 - Added an optional, importable `dashboards/hi-lab-operations.yaml` dashboard with a
   responsive Operations view and a separate detailed Evidence view, built only from
   native Home Assistant cards and the companion's eleven entities.
-- Refined the optional dashboard into a balanced two-column surface where width permits
-  and a clean single-column surface at narrower widths: historical contact and accepted
-  baseline now use their available width; validation and terminal outcome pair horizontally; queue
-  truth and explanation pair horizontally; and the Actions card is large enough to
-  remain an obvious but navigation-only operator route.
+- Refined the optional dashboard into a balanced tablet-first two-column surface with
+  a full-width official header. System pulse now pairs with Contact and restart,
+  Deployment lifecycle pairs with Baseline acceptance, and both pairs collapse in a
+  logical order on mobile. The proven horizontal validation, outcome, queue, and
+  navigation-only Actions treatment remains intact.
 - Added a darker dashboard-specific treatment of the official companion header and
   representative native icons across the Evidence groups while preserving the
   original README artwork and avoiding custom frontend dependencies.

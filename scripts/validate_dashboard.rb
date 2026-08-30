@@ -42,6 +42,72 @@ wide_sections = views.map do |view|
 end
 fail_contract("every view must have one deliberate full-width section") unless wide_sections == [1, 1]
 
+operations_sections = Array(views.first["sections"])
+operations_headings = operations_sections.map do |section|
+  Array(section["cards"]).find { |card| card.is_a?(Hash) && card["type"] == "heading" }&.fetch("heading", nil)
+end
+expected_operations_headings = [
+  "System pulse",
+  "Contact and restart",
+  "Deployment lifecycle",
+  "Baseline acceptance",
+  "Validation, outcome and queue"
+]
+fail_contract("Operations section order differs: #{operations_headings.inspect}") unless (
+  operations_headings == expected_operations_headings
+)
+fail_contract("the first two Operations rows must remain paired, not full-width") unless (
+  operations_sections.first(4).none? { |section| section["column_span"] }
+)
+
+contact_cards = Array(operations_sections[1]["cards"])
+last_contact_card = contact_cards.find do |card|
+  card.is_a?(Hash) && card["type"] == "tile" && card["name"] == "Last valid controller contact"
+end
+fail_contract("Last valid controller contact must be a compact full-section tile") unless (
+  last_contact_card && last_contact_card["grid_options"] == {"columns" => 12, "rows" => 2}
+)
+restart_summary_cards = contact_cards.each_with_object([]) do |card, found|
+  next unless card.is_a?(Hash) && card["type"] == "conditional" && card["card"].is_a?(Hash)
+  next unless ["Restart not required", "Restart required", "Restart truth unavailable"].include?(card["card"]["title"])
+
+  found << card
+end
+restart_summary_layouts = restart_summary_cards.to_h do |card|
+  [card["card"]["title"], card["grid_options"]]
+end
+fail_contract("Contact and restart must cover all three restart presentations") unless (
+  restart_summary_layouts == {
+    "Restart not required" => {"columns" => 12, "rows" => 2},
+    "Restart required" => {"columns" => 12, "rows" => 4},
+    "Restart truth unavailable" => {"columns" => 12, "rows" => 2}
+  }
+)
+
+deployment_cards = Array(operations_sections[2]["cards"])
+lifecycle_note = deployment_cards.find do |card|
+  card.is_a?(Hash) && card["type"] == "markdown" && card["content"].include?("Three separate facts")
+end
+fail_contract("Deployment lifecycle note must balance its paired section") unless (
+  lifecycle_note && lifecycle_note["grid_options"] == {"columns" => 12, "rows" => 3}
+)
+
+baseline_cards = Array(operations_sections[3]["cards"])
+baseline_tiles = baseline_cards.select do |card|
+  card.is_a?(Hash) && card["type"] == "conditional" && card.dig("card", "entity") == "sensor.hi_lab_controller_accepted_baseline"
+end
+fail_contract("all baseline states must use the same full-section tile geometry") unless (
+  baseline_tiles.length == 3 && baseline_tiles.all? do |card|
+    card["grid_options"] == {"columns" => 12, "rows" => 3}
+  end
+)
+acceptance_note = baseline_cards.find do |card|
+  card.is_a?(Hash) && card["type"] == "markdown" && card["title"] == "Acceptance boundary"
+end
+fail_contract("Baseline acceptance must retain its compact truth boundary") unless (
+  acceptance_note && acceptance_note["grid_options"] == {"columns" => 12, "rows" => 2}
+)
+
 expected_entities = Set[
   "sensor.hi_lab_controller_feed",
   "sensor.hi_lab_controller_last_contact",

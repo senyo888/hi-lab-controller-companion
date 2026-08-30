@@ -289,8 +289,10 @@ do not publish or share screenshots, exports, or raw YAML captured from the live
 **Evidence** view. The repository preview uses synthetic public-safe identities only.
 
 The imported **Operations** and **Evidence** views appear as native Home Assistant
-tabs. Operations is deliberately calm and scannable, with full-width historical
-contact and accepted-baseline truth plus a wide validation, outcome, and queue area.
+tabs. Operations is deliberately calm and scannable. Its official header spans the
+available view; tablet widths pair System pulse with Contact and restart, then
+Deployment lifecycle with Baseline acceptance. The wide validation, outcome, and
+queue area remains a single coherent band across both columns.
 Evidence carries the selected exact controller attributes in navy, teal, and amber
 groups that would make the operational glance too dense. The
 repository illustration previews that navigation model, but is a static public-safe
@@ -322,13 +324,15 @@ After import:
    displayed separately. The dashboard must not infer baseline acceptance by comparing
    identities.
 6. Check both **Operations** and **Evidence** at tablet and mobile widths. Operations
-   should use two balanced columns where the available content width permits, collapse
-   to one column at narrower widths, and show no orphaned half-width card beside an
-   empty cell. Historical contact, accepted baseline,
-   validation coverage, terminal outcome, queue explanation, and the Actions card
-   must remain readable without horizontal scrolling. Evidence attribute rows may wrap
-   but must remain readable. This check remains release evidence until the exact YAML
-   is imported and rendered in Home Assistant.
+   should show a full-width header and two balanced outer pairs where the available
+   content width permits: **System pulse / Contact and restart**, then **Deployment
+   lifecycle / Baseline acceptance**. Those pairs must collapse to one ordered column
+   at narrower widths, with no orphaned half-width card beside an empty cell.
+   Historical contact, accepted baseline, validation coverage, terminal outcome,
+   queue explanation, and the Actions card must remain readable without horizontal
+   scrolling. Evidence attribute rows may wrap but must remain readable. This check
+   remains release evidence until the exact YAML is imported and rendered in Home
+   Assistant.
 7. Open the raw configuration again and confirm there is no `custom:` card, service
    call, hold action, or double-tap action. The sole `tap_action` must be `navigate`
    with the exact path `/config/developer-tools/action`.
