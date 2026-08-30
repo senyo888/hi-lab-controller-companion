@@ -98,6 +98,7 @@ semantic_tiles = {}
 navigation_cards = []
 action_hashes = []
 queue_context_cards = []
+validation_coverage_cards = []
 
 positive_states = lambda do |conditions, found = []|
   Array(conditions).each do |condition|
@@ -117,6 +118,9 @@ walk = lambda do |value|
   when Hash
     navigation_cards << value if value["type"] == "button" && value.key?("tap_action")
     queue_context_cards << value if value["type"] == "markdown" && value["title"] == "Queue context"
+    validation_coverage_cards << value if (
+      value["type"] == "entities" && value["title"] == "Validation coverage" && value.key?("grid_options")
+    )
     action_hashes << value if value.key?("action")
     if value["type"] == "conditional" && value["card"].is_a?(Hash) && value["card"]["type"] == "tile"
       color = value["card"]["color"]
@@ -172,6 +176,13 @@ fail_contract("one always-present half-width Queue context card is required") un
 %w[DISABLED EMPTY WAITING FULL].each do |state|
   fail_contract("Queue context must distinguish #{state}") unless queue_context_cards.first["content"].include?(state)
 end
+expected_validation_coverage = validation_coverage_cards.one? &&
+                               validation_coverage_cards.first["grid_options"] == {
+                                 "columns" => "full", "rows" => 4
+                               }
+fail_contract("Operations Validation coverage must be full-width and four rows") unless (
+  expected_validation_coverage
+)
 
 (attribute_rows + template_attributes).each do |entity, attribute|
   allowed = documented_attributes.fetch(entity) do
