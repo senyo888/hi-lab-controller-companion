@@ -7,6 +7,14 @@
 - Added an optional, importable `dashboards/hi-lab-operations.yaml` dashboard with a
   responsive Operations view and a separate detailed Evidence view, built only from
   native Home Assistant cards and the companion's eleven entities.
+- Refined the optional dashboard into a balanced two-column surface where width permits
+  and a clean single-column surface at narrower widths: historical contact and accepted
+  baseline now use their available width; validation and terminal outcome pair horizontally; queue
+  truth and explanation pair horizontally; and the Actions card is large enough to
+  remain an obvious but navigation-only operator route.
+- Added a darker dashboard-specific treatment of the official companion header and
+  representative native icons across the Evidence groups while preserving the
+  original README artwork and avoiding custom frontend dependencies.
 - Added direct degraded-state callouts for feed integrity, readiness, mutation lock,
   restart truth, and queue truth while preserving active, pending, accepted-baseline,
   validation, and outcome facts as separate controller-owned evidence.
@@ -17,7 +25,7 @@
   renamed technical Stage B/Stage 3 dashboard rows to the public-facing **Integration
   health** and **Runtime truth** labels without changing their source attributes.
 - Made the native **Operations** and **Evidence** navigation model explicit and added
-  one compact **Open Actions tool** navigation-only button. It supplies no action data
+  one prominent **Open Actions tool** navigation-only card. It supplies no action data
   and cannot execute a Home Assistant action.
 - Added the official companion artwork and controller mark to the Operations header
   through a fixed Home Assistant-local asset path, with import and presentation-only

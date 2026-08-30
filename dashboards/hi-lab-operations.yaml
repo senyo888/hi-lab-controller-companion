@@ -5,7 +5,8 @@ views:
     icon: mdi:shield-home-outline
     show_icon_and_title: true
     type: sections
-    max_columns: 3
+    max_columns: 2
+    dense_section_placement: false
     header:
       layout: responsive
       badges_position: bottom
@@ -13,8 +14,8 @@ views:
         type: markdown
         content: |
           <div align="center">
-            <img src="/local/hi-lab-controller/companion-header.png"
-                 alt="HI Lab Controller Companion official header" width="100%">
+            <img src="/local/hi-lab-controller/companion-dashboard-header.png"
+                 alt="HI Lab Controller Companion dashboard header" width="100%">
           </div>
 
           # HI Lab Controller
@@ -26,7 +27,7 @@ views:
       - type: grid
         background:
           color: "#0b2942"
-          opacity: 18
+          opacity: 28
         cards:
           - type: heading
             heading: System pulse
@@ -219,10 +220,14 @@ views:
 
           - type: tile
             entity: sensor.hi_lab_controller_last_contact
-            name: Historical last valid contact
+            name: Last valid controller contact
             icon: mdi:clock-check-outline
             color: teal
+            vertical: false
             state_content: state
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -298,8 +303,8 @@ views:
 
       - type: grid
         background:
-          color: "#22c2c9"
-          opacity: 9
+          color: "#0d6f73"
+          opacity: 22
         cards:
           - type: heading
             heading: Deployment lifecycle
@@ -440,12 +445,12 @@ views:
               type: tile
               entity: sensor.hi_lab_controller_accepted_baseline
               name: Accepted baseline
-              icon: mdi:bookmark-minus-outline
+              icon: mdi:database-off-outline
               color: amber
-              vertical: true
+              vertical: false
             grid_options:
-              columns: 6
-              rows: 2
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -462,12 +467,12 @@ views:
               type: tile
               entity: sensor.hi_lab_controller_accepted_baseline
               name: Accepted baseline
-              icon: mdi:bookmark-check-outline
+              icon: mdi:database-check-outline
               color: green
-              vertical: true
+              vertical: false
             grid_options:
-              columns: 6
-              rows: 2
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -483,45 +488,36 @@ views:
               type: tile
               entity: sensor.hi_lab_controller_accepted_baseline
               name: Baseline truth
-              icon: mdi:bookmark-off-outline
+              icon: mdi:database-alert-outline
               color: red
-              vertical: true
+              vertical: false
             grid_options:
-              columns: 6
-              rows: 2
+              columns: 12
+              rows: 3
 
       - type: grid
+        column_span: 2
         background:
-          color: "#f0a000"
-          opacity: 9
+          color: "#7a4d00"
+          opacity: 20
         cards:
           - type: heading
-            heading: Outcome and queue
+            heading: Validation, outcome and queue
             heading_style: title
-            icon: mdi:timeline-check-outline
+            icon: mdi:clipboard-check-multiple-outline
+            grid_options:
+              columns: full
+              rows: 1
 
           - type: tile
             entity: sensor.hi_lab_controller_last_validation
-            name: Validation completed at
-            icon: mdi:timeline-clock-outline
+            name: Last validation
+            icon: mdi:clipboard-clock-outline
             color: blue-grey
-
-          - type: entities
-            title: Reported validation checks
-            show_header_toggle: false
-            entities:
-              - type: attribute
-                entity: sensor.hi_lab_controller_last_validation
-                attribute: installed_identity
-                name: Installed identity
-              - type: attribute
-                entity: sensor.hi_lab_controller_last_validation
-                attribute: stage_b_verdict
-                name: Integration health
-              - type: attribute
-                entity: sensor.hi_lab_controller_last_validation
-                attribute: stage_3_verdict
-                name: Runtime truth
+            vertical: false
+            grid_options:
+              columns: 12
+              rows: 2
 
           - type: conditional
             conditions:
@@ -539,6 +535,10 @@ views:
               name: Last terminal outcome
               icon: mdi:check-circle-outline
               color: green
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 2
 
           - type: conditional
             conditions:
@@ -556,6 +556,10 @@ views:
               name: Last terminal outcome
               icon: mdi:restore-alert
               color: amber
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 2
 
           - type: conditional
             conditions:
@@ -585,6 +589,10 @@ views:
               name: Last terminal outcome
               icon: mdi:alert-circle-outline
               color: red
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 2
 
           - type: conditional
             conditions:
@@ -597,11 +605,41 @@ views:
               name: Last terminal outcome
               icon: mdi:package-variant-remove
               color: blue-grey
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 2
+
+          - type: entities
+            title: Validation coverage
+            show_header_toggle: false
+            grid_options:
+              columns: full
+              rows: 3
+            entities:
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: installed_identity
+                name: Installed identity
+                icon: mdi:package-variant-closed-check
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_b_verdict
+                name: Integration health
+                icon: mdi:puzzle-check-outline
+              - type: attribute
+                entity: sensor.hi_lab_controller_last_validation
+                attribute: stage_3_verdict
+                name: Runtime truth
+                icon: mdi:heart-pulse
 
           - type: heading
             heading: Prepare queue
             heading_style: subtitle
-            icon: mdi:tray-full
+            icon: mdi:tray-arrow-down
+            grid_options:
+              columns: full
+              rows: 1
 
           - type: conditional
             conditions:
@@ -614,6 +652,10 @@ views:
               name: Safe default
               icon: mdi:tray-remove
               color: blue-grey
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -626,6 +668,10 @@ views:
               name: Prepare queue
               icon: mdi:tray
               color: green
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -643,6 +689,10 @@ views:
               name: Prepare queue
               icon: mdi:tray-full
               color: amber
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: conditional
             conditions:
@@ -669,37 +719,29 @@ views:
               name: Prepare queue
               icon: mdi:tray-alert
               color: red
+              vertical: false
+            grid_options:
+              columns: 12
+              rows: 3
 
-          - type: conditional
-            conditions:
-              - condition: state
-                entity: sensor.hi_lab_controller_prepare_queue
-                state: DISABLED
-            card:
-              type: markdown
-              content: |
-                **Disabled is the controller-owned safe default.** It is not a fault
-                and does not mean a request is waiting.
+          - type: markdown
+            title: Queue context
+            content: |
+              {% set queue_state = states('sensor.hi_lab_controller_prepare_queue') %}
+              {% if queue_state == 'DISABLED' %}
+                **Disabled is the controller-owned safe default.** No request is waiting.
+              {% elif queue_state == 'EMPTY' %}
+                **Enabled and empty.** The controller reports no queued request.
+              {% elif queue_state in ['WAITING', 'FULL'] %}
+                **Queue state: `{{ queue_state }}`.** Bounded work is waiting.
+              {% else %}
+                **Queue needs attention: `{{ queue_state }}`.** Check controller evidence.
+              {% endif %}
 
-          - type: conditional
-            conditions:
-              - condition: or
-                conditions:
-                  - condition: state
-                    entity: sensor.hi_lab_controller_prepare_queue
-                    state: BLOCKED
-                  - condition: state
-                    entity: sensor.hi_lab_controller_prepare_queue
-                    state: DEGRADED
-                  - condition: state
-                    entity: sensor.hi_lab_controller_prepare_queue
-                    state: UNAVAILABLE
-            card:
-              type: markdown
-              title: Queue needs attention
-              content: |
-                The controller reports `{{ states('sensor.hi_lab_controller_prepare_queue') }}`.
-                This surface cannot retry, cancel, claim, dispatch, or enable work.
+              Status only—this dashboard cannot retry, cancel, claim, dispatch, or enable work.
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: markdown
             content: |
@@ -708,25 +750,29 @@ views:
               The companion's eight administrator actions remain in the dedicated
               operator workflow. They are intentionally absent here so a status glance
               cannot become an accidental mutation path.
+            grid_options:
+              columns: 12
+              rows: 3
 
           - type: button
             name: Open Actions tool
-            icon: mdi:tools
+            icon: mdi:hammer-wrench
             show_name: true
             show_icon: true
             tap_action:
               action: navigate
               navigation_path: /config/developer-tools/action
             grid_options:
-              columns: 6
-              rows: 2
+              columns: 12
+              rows: 3
 
   - title: Evidence
     path: hi-lab-controller-evidence
     icon: mdi:text-box-search-outline
     show_icon_and_title: true
     type: sections
-    max_columns: 3
+    max_columns: 2
+    dense_section_placement: false
     header:
       layout: responsive
       badges_position: bottom
@@ -735,191 +781,229 @@ views:
         content: |
           # Controller evidence
 
-          Selected exact controller-authored attributes for verification and diagnosis.
-          This tab carries the detail intentionally kept out of the calm **Operations**
-          glance. Return to **Operations** for the responsive status overview.
+          **Exact controller-authored detail for verification and diagnosis.** Identity,
+          timing, validation, outcome, and queue evidence stay grouped here so the
+          **Operations** view can remain calm. This page reports truth; it does not
+          create or reinterpret it.
     sections:
       - type: grid
         background:
           color: "#0b2942"
-          opacity: 15
+          opacity: 28
         cards:
           - type: heading
             heading: Feed and deployment identity
+            heading_style: title
             icon: mdi:shield-search
 
           - type: entities
-            title: Feed evidence
+            title: Signed feed
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_feed
                 attribute: observed_schema_major
                 name: Observed schema major
+                icon: mdi:numeric
               - type: attribute
                 entity: sensor.hi_lab_controller_feed
                 attribute: supported_schema_majors
                 name: Supported schema majors
+                icon: mdi:layers-triple-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_feed
                 attribute: state_revision
                 name: Status revision
+                icon: mdi:file-document-refresh-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_feed
                 attribute: generated_at
                 name: Generated at
+                icon: mdi:clock-start
               - type: attribute
                 entity: sensor.hi_lab_controller_feed
                 attribute: expires_at
                 name: Expires at
+                icon: mdi:timer-sand
 
           - type: entities
-            title: Active identity
+            title: Active deployment
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_active_deployment
                 attribute: profile
                 name: Profile
+                icon: mdi:tune-variant
               - type: attribute
                 entity: sensor.hi_lab_controller_active_deployment
                 attribute: manifest_version
                 name: Manifest version
+                icon: mdi:tag-text-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_active_deployment
                 attribute: verified_at
                 name: Verified at
+                icon: mdi:check-decagram-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_active_deployment
                 attribute: accepted_baseline
                 name: Accepted-baseline flag
+                icon: mdi:database-outline
 
           - type: entities
-            title: Pending identity
+            title: Prepared deployment
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_pending_deployment
                 attribute: state
                 name: Lifecycle state
+                icon: mdi:state-machine
               - type: attribute
                 entity: sensor.hi_lab_controller_pending_deployment
                 attribute: profile
                 name: Profile
+                icon: mdi:tune-variant
               - type: attribute
                 entity: sensor.hi_lab_controller_pending_deployment
                 attribute: manifest_version
                 name: Manifest version
+                icon: mdi:tag-text-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_pending_deployment
                 attribute: previous_deployment_id
                 name: Predecessor
+                icon: mdi:source-branch
               - type: attribute
                 entity: sensor.hi_lab_controller_pending_deployment
                 attribute: updated_at
                 name: Updated at
+                icon: mdi:update
 
           - type: entities
-            title: Baseline evidence
+            title: Accepted baseline
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_accepted_baseline
                 attribute: target_slot
                 name: Target slot
+                icon: mdi:bullseye-arrow
               - type: attribute
                 entity: sensor.hi_lab_controller_accepted_baseline
                 attribute: profile
                 name: Profile
+                icon: mdi:tune-variant
               - type: attribute
                 entity: sensor.hi_lab_controller_accepted_baseline
                 attribute: manifest_version
                 name: Manifest version
+                icon: mdi:tag-text-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_accepted_baseline
                 attribute: accepted_at
                 name: Accepted at
+                icon: mdi:calendar-check-outline
 
       - type: grid
         background:
-          color: "#22c2c9"
-          opacity: 8
+          color: "#0d6f73"
+          opacity: 22
         cards:
           - type: heading
             heading: Readiness and result
+            heading_style: title
             icon: mdi:clipboard-text-search-outline
 
           - type: entities
-            title: Readiness evidence
+            title: Readiness and lock
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_readiness
                 attribute: state_revision
                 name: Status revision
+                icon: mdi:file-document-refresh-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_mutation_lock
                 attribute: owner_kind
                 name: Lock owner kind
+                icon: mdi:account-lock-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_mutation_lock
                 attribute: held_at
                 name: Lock held at
+                icon: mdi:lock-clock
 
           - type: entities
-            title: Validation evidence
+            title: Validation coverage
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_last_validation
                 attribute: deployment_id
                 name: Deployment
+                icon: mdi:package-variant-closed-check
               - type: attribute
                 entity: sensor.hi_lab_controller_last_validation
                 attribute: stage_b_passed
                 name: Integration services available
+                icon: mdi:puzzle-check-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_last_validation
                 attribute: stage_b_expected
                 name: Integration services required
+                icon: mdi:puzzle-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_last_validation
                 attribute: stage_3_passed
                 name: Runtime entities healthy
+                icon: mdi:heart-pulse
               - type: attribute
                 entity: sensor.hi_lab_controller_last_validation
                 attribute: stage_3_expected
                 name: Runtime entities expected
+                icon: mdi:gauge
 
           - type: entities
-            title: Outcome evidence
+            title: Last terminal result
             show_header_toggle: false
             entities:
               - type: attribute
                 entity: sensor.hi_lab_controller_last_outcome
                 attribute: deployment_id
                 name: Deployment
+                icon: mdi:package-variant-closed
               - type: attribute
                 entity: sensor.hi_lab_controller_last_outcome
                 attribute: profile
                 name: Profile
+                icon: mdi:tune-variant
               - type: attribute
                 entity: sensor.hi_lab_controller_last_outcome
                 attribute: completed_at
                 name: Completed at
+                icon: mdi:check-circle-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_last_outcome
                 attribute: error_codes
                 name: Error codes
+                icon: mdi:alert-circle-outline
 
       - type: grid
+        column_span: 2
         background:
-          color: "#f0a000"
-          opacity: 8
+          color: "#7a4d00"
+          opacity: 20
         cards:
           - type: heading
             heading: Queue evidence
-            icon: mdi:tray-full
+            heading_style: title
+            icon: mdi:tray-arrow-down
+            grid_options:
+              columns: full
+              rows: 1
 
           - type: entities
             title: Bounded prepare queue
@@ -929,20 +1013,31 @@ views:
                 entity: sensor.hi_lab_controller_prepare_queue
                 attribute: enabled
                 name: Enabled
+                icon: mdi:toggle-switch-outline
               - type: attribute
                 entity: sensor.hi_lab_controller_prepare_queue
                 attribute: depth
                 name: Depth
+                icon: mdi:format-list-numbered
               - type: attribute
                 entity: sensor.hi_lab_controller_prepare_queue
                 attribute: max_depth
                 name: Maximum depth
+                icon: mdi:arrow-expand-vertical
               - type: attribute
                 entity: sensor.hi_lab_controller_prepare_queue
                 attribute: entries
                 name: Bounded entries
+                icon: mdi:tray-full
+            grid_options:
+              columns: 12
+              rows: 4
 
           - type: markdown
+            title: Evidence boundary
             content: |
               Queue truth is evidence only. Enablement, admission, cancellation, claim,
               dispatch, restart, and acceptance remain separate controller-governed steps.
+            grid_options:
+              columns: 12
+              rows: 4

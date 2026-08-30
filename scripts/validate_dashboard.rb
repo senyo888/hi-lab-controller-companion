@@ -30,12 +30,17 @@ fail_contract("view paths differ: #{view_paths.inspect}") unless view_paths == [
 ]
 views.each do |view|
   fail_contract("every view must use sections") unless view["type"] == "sections"
-  fail_contract("every view must use a three-column responsive maximum") unless view["max_columns"] == 3
+  fail_contract("every view must use a two-column responsive maximum") unless view["max_columns"] == 2
+  fail_contract("every view must preserve ordered section placement") unless view["dense_section_placement"] == false
   header = view["header"]
   fail_contract("every view must have a responsive header") unless (
     header.is_a?(Hash) && header["layout"] == "responsive"
   )
 end
+wide_sections = views.map do |view|
+  Array(view["sections"]).count { |section| section.is_a?(Hash) && section["column_span"] == 2 }
+end
+fail_contract("every view must have one deliberate full-width section") unless wide_sections == [1, 1]
 
 expected_entities = Set[
   "sensor.hi_lab_controller_feed",
@@ -92,6 +97,7 @@ forbidden_keys = Set["service", "service_data", "hold_action", "double_tap_actio
 semantic_tiles = {}
 navigation_cards = []
 action_hashes = []
+queue_context_cards = []
 
 positive_states = lambda do |conditions, found = []|
   Array(conditions).each do |condition|
@@ -110,6 +116,7 @@ walk = lambda do |value|
   case value
   when Hash
     navigation_cards << value if value["type"] == "button" && value.key?("tap_action")
+    queue_context_cards << value if value["type"] == "markdown" && value["title"] == "Queue context"
     action_hashes << value if value.key?("action")
     if value["type"] == "conditional" && value["card"].is_a?(Hash) && value["card"]["type"] == "tile"
       color = value["card"]["color"]
@@ -144,14 +151,14 @@ fail_contract("non-native card types found: #{unknown_types.to_a.sort.inspect}")
 expected_navigation_card = {
   "type" => "button",
   "name" => "Open Actions tool",
-  "icon" => "mdi:tools",
+  "icon" => "mdi:hammer-wrench",
   "show_name" => true,
   "show_icon" => true,
   "tap_action" => {
     "action" => "navigate",
     "navigation_path" => "/config/developer-tools/action"
   },
-  "grid_options" => {"columns" => 6, "rows" => 2}
+  "grid_options" => {"columns" => 12, "rows" => 3}
 }.freeze
 fail_contract("exactly one bounded Actions-tool navigation button is required") unless (
   navigation_cards == [expected_navigation_card]
@@ -159,6 +166,12 @@ fail_contract("exactly one bounded Actions-tool navigation button is required") 
 fail_contract("the only action must be the bounded Actions-tool navigation") unless (
   action_hashes == [{"action" => "navigate", "navigation_path" => "/config/developer-tools/action"}]
 )
+expected_queue_context = queue_context_cards.one? &&
+                         queue_context_cards.first["grid_options"] == {"columns" => 12, "rows" => 3}
+fail_contract("one always-present half-width Queue context card is required") unless expected_queue_context
+%w[DISABLED EMPTY WAITING FULL].each do |state|
+  fail_contract("Queue context must distinguish #{state}") unless queue_context_cards.first["content"].include?(state)
+end
 
 (attribute_rows + template_attributes).each do |entity, attribute|
   allowed = documented_attributes.fetch(entity) do

@@ -92,8 +92,12 @@ unchanged for compatibility.
 
 The responsive **Operations** view gives feed integrity, readiness, deployment
 lifecycle, lock, baseline, validation, outcome, queue, and restart truth a calm
-maintainer-facing hierarchy. A separate **Evidence** view keeps exact attributes close
-without overwhelming the operational glance. The dashboard maps explicit controller
+maintainer-facing hierarchy. At widths where two section columns fit, cards expand
+instead of leaving empty grid cells; narrower content widths collapse cleanly to one
+readable column. The wide validation, outcome, and queue section pairs related facts
+horizontally where space permits. A separate **Evidence** view groups exact attributes
+into distinct, icon-led evidence cards without overwhelming the operational glance. The dashboard
+maps explicit controller
 state values to presentational colours; the displayed raw state remains authoritative.
 Green marks an expected or clear state for that tile, amber flags attention, and red
 marks blocked, invalid, stale, degraded, or unavailable truth. Cyan, teal, and
@@ -103,14 +107,15 @@ separate facts, and unavailable state never appears healthy.
 
 The two view names become native Home Assistant tabs: **Operations** keeps the calm
 at-a-glance hierarchy, while **Evidence** exposes the selected exact attributes that
-would otherwise crowd it. One small **Open Actions tool** button navigates an
+would otherwise crowd it. A prominent **Open Actions tool** card navigates an
 administrator to Home Assistant's own action tool. It cannot prefill or execute an
 action from the dashboard or supply action data; the native tool can retain its own
 prior editor state. This does not weaken the companion's controller-authority
 boundary.
 
-The Operations header uses the repository's official companion artwork and controller
-mark from a fixed Home Assistant-local asset path. It is presentation only: no remote
+The Operations header uses a dashboard-tuned, darker variant of the repository's
+official companion artwork and controller mark from a fixed Home Assistant-local
+asset path. The original README header remains unchanged. Both are presentation only: no remote
 image request, custom frontend card, or additional controller capability is
 introduced.
 

@@ -133,16 +133,30 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertIn("name: Open Actions tool", dashboard)
         self.assertEqual(
             dashboard.count(
-                'src="/local/hi-lab-controller/companion-header.png"'
+                'src="/local/hi-lab-controller/companion-dashboard-header.png"'
             ),
             1,
         )
-        self.assertTrue(
-            (ROOT / "assets" / "hi-lab-controller-companion-header.png").is_file()
+        dashboard_header = (
+            ROOT / "assets" / "hi-lab-controller-companion-dashboard-header.png"
         )
+        dashboard_header_payload = dashboard_header.read_bytes()
+        self.assertEqual(dashboard_header_payload[:8], b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", dashboard_header_payload[16:24])
+        self.assertEqual((width, height), (2172, 724))
         self.assertEqual(dashboard.count("path: hi-lab-controller\n"), 1)
         self.assertEqual(dashboard.count("path: hi-lab-controller-evidence\n"), 1)
         self.assertEqual(dashboard.count("layout: responsive"), 2)
+        self.assertEqual(dashboard.count("max_columns: 2"), 2)
+        self.assertEqual(dashboard.count("dense_section_placement: false"), 2)
+        self.assertEqual(dashboard.count("column_span: 2"), 2)
+        self.assertIn("name: Last valid controller contact", dashboard)
+        self.assertIn("heading: Validation, outcome and queue", dashboard)
+        self.assertIn("title: Evidence boundary", dashboard)
+        self.assertEqual(dashboard.count("title: Queue context"), 1)
+        self.assertIn("icon: mdi:hammer-wrench", dashboard)
+        self.assertIn("icon: mdi:shield-search\n", dashboard)
+        self.assertNotIn("icon: mdi:shield-search-outline", dashboard)
         for color in ("green", "amber", "red"):
             self.assertIn(f"color: {color}", dashboard)
         for state in (

@@ -239,8 +239,8 @@ eleven native entities.
 
 1. Complete companion installation and confirm all eleven entities exist.
 2. Copy
-   [`assets/hi-lab-controller-companion-header.png`](../assets/hi-lab-controller-companion-header.png)
-   to `/config/www/hi-lab-controller/companion-header.png` on the target Home
+   [`assets/hi-lab-controller-companion-dashboard-header.png`](../assets/hi-lab-controller-companion-dashboard-header.png)
+   to `/config/www/hi-lab-controller/companion-dashboard-header.png` on the target Home
    Assistant. Keep the file local to Home Assistant; do not replace it with a remote
    image URL. The header is intentionally public artwork because files under `/local`
    are not an authenticated evidence surface. If `/config/www` does not already
@@ -259,8 +259,12 @@ eleven native entities.
    documented default ID with the matching registered entity. Do not substitute a
    helper, template sensor, or controller-private identity.
 
-The template uses responsive Sections headers, section backgrounds, native Tile colors,
-and card grid sizing. **Use Home Assistant 2026.4 or newer for the template exactly as
+The template uses responsive Sections headers, two-column section spans, section
+backgrounds, native Tile colors, and card grid sizing. At widths where two section
+columns fit, cards expand into available cells and the validation/outcome, queue, and
+evidence groups use the full view width. Narrower content widths collapse cleanly to
+one readable column. **Use
+Home Assistant 2026.4 or newer for the template exactly as
 shipped; 2026.4 introduced section backgrounds.** Earlier frontends are outside this
 template's validated presentation contract. It follows the installed Home Assistant
 theme; the navy, teal, and amber
@@ -270,11 +274,14 @@ rendering under every theme and viewport.
 
 The integration bundles its official controller mark under `brand/`, so Home Assistant
 2026.3 and newer can use it on integration and device surfaces. The dashboard header
-uses the official wide companion artwork from the explicit local `www` copy because
+uses the official wide companion artwork in a darker dashboard-tuned treatment from
+the explicit local `www` copy because
 Lovelace YAML cannot portably request the authenticated brand image endpoint. That
 artwork incorporates the controller mark without the small icon's package-background
 treatment. State tiles retain native MDI icons so condition meaning remains clear at
-small sizes. The public preview uses the same official identity.
+small sizes. Evidence attribute rows use representative MDI icons rather than a
+repeated generic marker. The original README header remains unchanged; the public
+preview uses the same official identity.
 
 Home Assistant view visibility is presentation, not an access-control boundary: a
 hidden view can still be reached by direct URL. Keep dashboard access Admin only and
@@ -282,8 +289,10 @@ do not publish or share screenshots, exports, or raw YAML captured from the live
 **Evidence** view. The repository preview uses synthetic public-safe identities only.
 
 The imported **Operations** and **Evidence** views appear as native Home Assistant
-tabs. Operations is deliberately calm and scannable; Evidence carries the selected
-exact controller attributes that would make the operational glance too dense. The
+tabs. Operations is deliberately calm and scannable, with full-width historical
+contact and accepted-baseline truth plus a wide validation, outcome, and queue area.
+Evidence carries the selected exact controller attributes in navy, teal, and amber
+groups that would make the operational glance too dense. The
 repository illustration previews that navigation model, but is a static public-safe
 image rather than a second dashboard implementation.
 
@@ -312,10 +321,14 @@ After import:
 5. Confirm **Active deployment**, **Pending deployment**, and **Accepted baseline** are
    displayed separately. The dashboard must not infer baseline acceptance by comparing
    identities.
-6. Check both **Operations** and **Evidence** at desktop and mobile widths. Operations
-   should reflow without horizontal scrolling; Evidence attribute rows may wrap but
-   must remain readable. This check remains release evidence until the exact YAML is
-   imported and rendered in Home Assistant.
+6. Check both **Operations** and **Evidence** at tablet and mobile widths. Operations
+   should use two balanced columns where the available content width permits, collapse
+   to one column at narrower widths, and show no orphaned half-width card beside an
+   empty cell. Historical contact, accepted baseline,
+   validation coverage, terminal outcome, queue explanation, and the Actions card
+   must remain readable without horizontal scrolling. Evidence attribute rows may wrap
+   but must remain readable. This check remains release evidence until the exact YAML
+   is imported and rendered in Home Assistant.
 7. Open the raw configuration again and confirm there is no `custom:` card, service
    call, hold action, or double-tap action. The sole `tap_action` must be `navigate`
    with the exact path `/config/developer-tools/action`.
@@ -336,5 +349,6 @@ Removing the dashboard or replacing its raw configuration affects presentation o
 It does not unload the integration, change HACS ownership, call the controller, mutate
 Home Assistant runtime state, cancel work, restart Home Assistant, or change any
 deployment or baseline. Before editing an established view, save its current raw YAML
-so the presentation change can be reversed exactly. The optional local mark can be
-removed separately after the previous dashboard configuration has been restored.
+so the presentation change can be reversed exactly. The optional local dashboard
+header can be removed separately after the previous dashboard configuration has been
+restored.
