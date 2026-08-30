@@ -72,6 +72,18 @@ status `dashboard` capability, which remains controller-provided protocol truth,
 does not add runtime, deployment, baseline, HACS, publication, or release authority.
 Removing the dashboard changes presentation only.
 
+The manual bundle design in `docs/DASHBOARD_BUNDLE_CONTRACT.md` is accepted as
+design only by controller decision `HILC-ADR-20260830-006`; this companion repository
+continues to own its source contract. It binds this canonical YAML, public assets,
+compatibility metadata, and the eleven current entity semantics to a versioned
+manifest. Its checked-in example remains contract evidence only, not a companion
+release or live dashboard installation. Manual preview, private backup, explicit
+administrator confirmation, supported-editor import, readback, and manual restore
+remain the first delivery path. The contract does not change
+`capabilities.dashboard: false`, and it grants no browser automation, direct
+Home Assistant save, direct `.storage` write, runtime action, restart, or release
+authority.
+
 ## Security and privacy
 
 Tracked files are public-safe. Shared secrets, target identities, mailbox contents,

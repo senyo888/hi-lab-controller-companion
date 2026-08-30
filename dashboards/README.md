@@ -26,3 +26,9 @@ Assistant `www/hi-lab-controller/` directory as part of import.
 See [Using the companion](../docs/USING_THE_COMPANION.md#install-the-optional-read-only-dashboard)
 for import, compatibility, responsive-layout checks, truth verification, and
 presentation-only rollback.
+
+For exact bundle metadata, artifact digests, compatibility, entity semantics, and
+the preview/backup/confirmation/readback workflow, see the
+[manual dashboard bundle contract](../docs/DASHBOARD_BUNDLE_CONTRACT.md). The
+checked-in manifest is a contract example, not release, installation, or live-import
+evidence.
