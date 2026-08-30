@@ -12,6 +12,11 @@ views:
       card:
         type: markdown
         content: |
+          <div align="center">
+            <img src="/local/hi-lab-controller/companion-header.png"
+                 alt="HI Lab Controller Companion official header" width="100%">
+          </div>
+
           # HI Lab Controller
 
           **A calm, read-only view of controller truth.** Green marks an expected or

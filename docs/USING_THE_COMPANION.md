@@ -230,21 +230,32 @@ maintainer-governed recovery route, not the normal HACS update path.
 The template at [`dashboards/hi-lab-operations.yaml`](../dashboards/hi-lab-operations.yaml)
 is an optional presentation surface. It uses only core **Sections**, **Heading**,
 **Markdown**, **Conditional**, **Tile**, **Entities**, and **Button** cards and native
-attribute rows. It has no custom-card, theme, JavaScript, external-network, or
-controller dependency beyond the companion's eleven native entities.
+attribute rows. Its Markdown header displays the repository's official companion
+artwork and controller mark from a Home Assistant-local asset. It has no custom-card,
+theme, JavaScript, external-network, or controller dependency beyond the companion's
+eleven native entities.
 
 ### Import as a new dashboard
 
 1. Complete companion installation and confirm all eleven entities exist.
-2. In Home Assistant, open **Settings → Dashboards** and create a new dashboard in
+2. Copy
+   [`assets/hi-lab-controller-companion-header.png`](../assets/hi-lab-controller-companion-header.png)
+   to `/config/www/hi-lab-controller/companion-header.png` on the target Home
+   Assistant. Keep the file local to Home Assistant; do not replace it with a remote
+   image URL. The header is intentionally public artwork because files under `/local`
+   are not an authenticated evidence surface. If `/config/www` does not already
+   exist, Home Assistant can require a restart before serving it; omit the artwork or
+   obtain separate restart authority rather than restarting as part of dashboard
+   import.
+3. In Home Assistant, open **Settings → Dashboards** and create a new dashboard in
    storage mode. On the dedicated private HA Lab, make the dashboard **Admin only**;
    its Evidence view contains live operational identities and diagnostics.
-3. Open the new dashboard, choose **Edit dashboard → three-dot menu → Raw
+4. Open the new dashboard, choose **Edit dashboard → three-dot menu → Raw
    configuration editor**.
-4. Copy the complete contents of
+5. Copy the complete contents of
    [`dashboards/hi-lab-operations.yaml`](../dashboards/hi-lab-operations.yaml), replace
    the editor contents, save, and reload the dashboard once.
-5. If Home Assistant changed an entity ID after an operator rename, replace each
+6. If Home Assistant changed an entity ID after an operator rename, replace each
    documented default ID with the matching registered entity. Do not substitute a
    helper, template sensor, or controller-private identity.
 
@@ -258,10 +269,12 @@ concept, not an imported Home Assistant screenshot or a promise of pixel-identic
 rendering under every theme and viewport.
 
 The integration bundles its official controller mark under `brand/`, so Home Assistant
-2026.3 and newer can use it on integration and device surfaces. The dashboard keeps
-native MDI state icons because Lovelace YAML cannot portably request the authenticated
-brand image endpoint; it does not substitute an unofficial dashboard logo or add a
-remote image dependency. The public preview uses the bundled official mark.
+2026.3 and newer can use it on integration and device surfaces. The dashboard header
+uses the official wide companion artwork from the explicit local `www` copy because
+Lovelace YAML cannot portably request the authenticated brand image endpoint. That
+artwork incorporates the controller mark without the small icon's package-background
+treatment. State tiles retain native MDI icons so condition meaning remains clear at
+small sizes. The public preview uses the same official identity.
 
 Home Assistant view visibility is presentation, not an access-control boundary: a
 hidden view can still be reached by direct URL. Keep dashboard access Admin only and
@@ -313,7 +326,9 @@ approve a restart, dispatch queue work, or accept a baseline. Administrator acti
 remain separately documented under [The eight administrator actions](#the-eight-administrator-actions)
 and are intentionally absent from the dashboard. **Open Actions tool**
 only opens Home Assistant's native administrator tool; it does not prefill, select, or
-execute an action. Admin access and deliberate action selection remain required.
+execute an action or pass action data. The native tool can retain its own prior editor
+state, so always inspect the selected action and fields before use. Admin access and
+deliberate action selection remain required.
 
 ### Remove or roll back the dashboard
 
@@ -321,4 +336,5 @@ Removing the dashboard or replacing its raw configuration affects presentation o
 It does not unload the integration, change HACS ownership, call the controller, mutate
 Home Assistant runtime state, cancel work, restart Home Assistant, or change any
 deployment or baseline. Before editing an established view, save its current raw YAML
-so the presentation change can be reversed exactly.
+so the presentation change can be reversed exactly. The optional local mark can be
+removed separately after the previous dashboard configuration has been restored.

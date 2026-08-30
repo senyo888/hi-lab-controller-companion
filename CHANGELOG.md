@@ -17,11 +17,14 @@
   renamed technical Stage B/Stage 3 dashboard rows to the public-facing **Integration
   health** and **Runtime truth** labels without changing their source attributes.
 - Made the native **Operations** and **Evidence** navigation model explicit and added
-  one compact **Open Actions tool** navigation-only button. It cannot
-  prefill or execute a Home Assistant action.
-- Added repository and parsed-YAML contract checks that reject undocumented entities
-  or attributes, custom cards, action/service calls, unbounded interactions, and
-  missing degraded-state coverage.
+  one compact **Open Actions tool** navigation-only button. It supplies no action data
+  and cannot execute a Home Assistant action.
+- Added the official companion artwork and controller mark to the Operations header
+  through a fixed Home Assistant-local asset path, with import and presentation-only
+  rollback guidance and no remote image or optional-card dependency.
+- Added repository contract checks that reject extra entity IDs, custom cards,
+  action/service calls, unbounded interactions, and missing degraded-state coverage,
+  and that bind the dashboard to its official local header artwork.
 - Added a public operator guide for HACS installation, activation, verification,
   updates, rollback, all eleven native entities, and all eight administrator actions.
 - Added a README architecture diagram that distinguishes Home Assistant presentation

@@ -131,6 +131,15 @@ class RepositoryContractTests(unittest.TestCase):
             dashboard.count("navigation_path: /config/developer-tools/action"), 1
         )
         self.assertIn("name: Open Actions tool", dashboard)
+        self.assertEqual(
+            dashboard.count(
+                'src="/local/hi-lab-controller/companion-header.png"'
+            ),
+            1,
+        )
+        self.assertTrue(
+            (ROOT / "assets" / "hi-lab-controller-companion-header.png").is_file()
+        )
         self.assertEqual(dashboard.count("path: hi-lab-controller\n"), 1)
         self.assertEqual(dashboard.count("path: hi-lab-controller-evidence\n"), 1)
         self.assertEqual(dashboard.count("layout: responsive"), 2)

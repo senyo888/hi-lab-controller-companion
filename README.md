@@ -105,7 +105,14 @@ The two view names become native Home Assistant tabs: **Operations** keeps the c
 at-a-glance hierarchy, while **Evidence** exposes the selected exact attributes that
 would otherwise crowd it. One small **Open Actions tool** button navigates an
 administrator to Home Assistant's own action tool. It cannot prefill or execute an
-action and does not weaken the companion's controller-authority boundary.
+action from the dashboard or supply action data; the native tool can retain its own
+prior editor state. This does not weaken the companion's controller-authority
+boundary.
+
+The Operations header uses the repository's official companion artwork and controller
+mark from a fixed Home Assistant-local asset path. It is presentation only: no remote
+image request, custom frontend card, or additional controller capability is
+introduced.
 
 Import the raw YAML as a new dashboard after the integration has registered
 its entities. Home Assistant may assign different entity IDs after an operator rename;
