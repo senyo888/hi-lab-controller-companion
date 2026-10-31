@@ -1,0 +1,78 @@
+# Optional section for the existing Operations view; import manually after pairing.
+# Uses only core cards and the four observation entities added in 0.5.0-beta.1.
+type: grid
+cards:
+  - type: heading
+    heading: Integration soak
+    heading_style: title
+    icon: mdi:clipboard-pulse-outline
+  - type: entities
+    show_header_toggle: false
+    entities:
+      - entity: sensor.hi_lab_controller_observation_feed
+        name: Observation reporting
+      - entity: sensor.hi_lab_controller_observation_integration
+        name: Selected integration
+      - entity: sensor.hi_lab_controller_observation_campaign
+        name: Campaign state
+      - entity: sensor.hi_lab_controller_observation_last_result
+        name: Last recorded campaign result
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: sensor.hi_lab_controller_observation_feed
+        state: fresh
+    card:
+      type: markdown
+      content: |
+        **Expected reference:** {{ state_attr('sensor.hi_lab_controller_observation_integration', 'reference_label') }}
+
+        {% set campaign = state_attr('sensor.hi_lab_controller_observation_campaign', 'campaign') %}
+        {% if campaign %}
+        **Campaign integration:** {{ campaign.integration_label }}
+
+        **Campaign reference:** {{ campaign.reference_label }}
+
+        **Recorded checkpoints:** {{ campaign.completed_slots }} / {{ campaign.total_slots }}
+
+        **Result:** {{ campaign.result }}
+
+        **Next checkpoint:** {{ campaign.next_checkpoint_at or 'None scheduled' }}
+
+        **Report:** {{ campaign.report_id }}
+
+        **Reasons:** {{ campaign.reasons | join(', ') or 'None reported' }}
+        {% else %}
+        **Idle.** No campaign is selected. Background: {{ state_attr('sensor.hi_lab_controller_observation_campaign', 'background_state') }}.
+        {% endif %}
+
+        Reported health at sampled checkpoints. This does not prove continuous
+        health, installed source bytes or baseline acceptance. Start and Stop remain
+        in the native controller on the Mac.
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: sensor.hi_lab_controller_observation_feed
+        state_not: fresh
+    card:
+      type: markdown
+      content: |
+        **Observation reporting is unavailable.** Current campaign values are withheld.
+
+        Reason: {{ state_attr('sensor.hi_lab_controller_observation_feed', 'error_code') or 'No current feed' }}.
+
+        The native controller owns the campaign. An unavailable feed does not stop it.
+        Previous results retain their original times and cannot establish current health.
+  - type: markdown
+    title: Retained result
+    content: |
+      {% set retained = state_attr('sensor.hi_lab_controller_observation_last_result', 'campaign') %}
+      {% if retained %}
+      **Previously observed:** {{ retained.integration_label }} — {{ retained.result }}.
+
+      Reference: {{ retained.reference_label }}. Finished: {{ retained.finished_at }}.
+
+      Report: {{ retained.report_id }}. Historical only; not current health.
+      {% else %}
+      No authenticated terminal result retained by this reporting stream.
+      {% endif %}

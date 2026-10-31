@@ -223,11 +223,11 @@ class DashboardBundleContractTests(unittest.TestCase):
         )
         self.assertEqual(
             manifest["compatibility"]["companion"]["minimum_version"],
-            companion_manifest["version"],
+            "0.4.1",  # legacy eleven-entity bundle; observation section is separate
         )
         self.assertEqual(
             manifest["compatibility"]["companion"]["maximum_tested_version"],
-            companion_manifest["version"],
+            "0.4.1",  # retained bundle contract, not an installed v0.5 claim
         )
         self.assertEqual(
             manifest["compatibility"]["companion"]["installation_owner"],

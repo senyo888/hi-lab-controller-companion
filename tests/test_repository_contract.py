@@ -30,7 +30,7 @@ class RepositoryContractTests(unittest.TestCase):
         manifest = json.loads((COMPONENT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["domain"], "hi_lab_controller")
         self.assertEqual(manifest["name"], "HI Lab Controller")
-        self.assertEqual(manifest["version"], "0.4.1")
+        self.assertEqual(manifest["version"], "0.5.0-beta.1")
         self.assertEqual(manifest["iot_class"], "local_polling")
         self.assertEqual(manifest["requirements"], [])
         self.assertEqual(

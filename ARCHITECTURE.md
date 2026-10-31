@@ -28,11 +28,20 @@ only authority for source resolution and package operations.
 ## Compatibility contract
 
 - Domain: `hi_lab_controller`
-- Companion release line: `0.4.x`
+- Companion release line: `0.4.x`; optional reporting source candidate `0.5.0-beta.1`
 - Supported status schema majors: `1` and `2`
 - Registered actions: eight fixed services declared in `services.yaml`
-- Registered entities: ten sensors and one binary sensor
-- Configuration schema: one local shared secret, stored by Home Assistant
+- Legacy entities: ten sensors and one binary sensor, unchanged
+- Additive observation entities: four sensors with independent availability
+- Configuration schema: one legacy shared secret; optional explicit observation instance/epoch/key pairing
+
+The [observation v2 compatibility contract](docs/OBSERVATION_REPORTING.md) adds a
+fixed administrator-authenticated signed telemetry endpoint and separate durable
+replay custody. The external controller remains the only campaign owner/scheduler.
+No new action or Start/Stop surface is provided. Selection, campaign identity,
+checkpoint time, current feed expiry and historical results remain distinct.
+Receiver unload drains a physical persistence operation before a replacement loads
+its sequence floor. Reporting storage is separate from the legacy mailbox/status.
 
 Changes to an action name, entity identity, signature domain, status schema support,
 mailbox location, or restart behavior require a versioned compatibility decision and

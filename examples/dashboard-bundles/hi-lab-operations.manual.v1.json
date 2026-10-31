@@ -51,8 +51,8 @@
   "dashboard": {
     "artifact": {
       "path": "dashboards/hi-lab-operations.yaml",
-      "sha256": "b2afa94ecc078789be314f606a53c6dd576d9bad785f8e1c843f047bdede66fd",
-      "bytes": 38108,
+      "sha256": "07182f0a74b6c02020e0c9ccbc6f7f778eafa7cd29e36776bf9e907bf0ea613b",
+      "bytes": 48482,
       "media_type": "application/yaml"
     },
     "import_surface": "lovelace_raw_configuration_editor",

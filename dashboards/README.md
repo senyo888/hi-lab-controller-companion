@@ -32,3 +32,25 @@ the preview/backup/confirmation/readback workflow, see the
 [manual dashboard bundle contract](../docs/DASHBOARD_BUNDLE_CONTRACT.md). The
 checked-in manifest is a contract example, not release, installation, or live-import
 evidence.
+
+## Missing and historical evidence
+
+Evidence cards explain missing records instead of presenting empty attribute rows.
+The signed deployment feed must be fresh before deployment records are shown.
+`none` is kept distinct from `unknown` and `unavailable`: no pending deployment is
+an explicit controller fact, while an unavailable active identity is not proof
+that the integration is stopped. A `CLEAR` mutation lock has no owner or held-at
+timestamp; it does not establish deployment readiness. A disabled queue remains
+controller-owned and cannot be enabled here.
+
+Accepted baseline and terminal deployment outcomes are labelled as historical
+records and retain the controller's original acceptance/completion dates. They do
+not identify the currently running package or accept a later version. Missing
+Stage B/Stage 3 deployment validation and restart evidence remain unavailable;
+a completed observation soak cannot fill those gaps. Per-field `not reported`
+wording preserves reported zero counts and false flags. The independent observation
+sections and their retained campaign results are unchanged.
+
+These are presentation changes only. Import still requires the existing manual
+preview, backup, explicit confirmation and readback workflow. The illustrative
+preview above is a layout reference, not current runtime evidence.

@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hi:hilc:integration-observation-companion:v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stream_epoch",
+    "sequence",
+    "generated_at",
+    "expires_at",
+    "background_state",
+    "campaign",
+    "controller_instance_id",
+    "selected_profile"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "hilc.integration-observation.v2"
+    },
+    "stream_epoch": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "background_state": {
+      "enum": [
+        "RUNNING",
+        "PAUSED",
+        "UNAVAILABLE"
+      ]
+    },
+    "campaign": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "profile_id",
+            "integration_label",
+            "domain",
+            "reference_label",
+            "evidence_scope",
+            "state",
+            "result",
+            "completed_slots",
+            "total_slots",
+            "reasons",
+            "source_identity",
+            "baseline",
+            "started_at",
+            "finished_at",
+            "next_checkpoint_at",
+            "report_id",
+            "checkpoints"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+            },
+            "integration_label": {
+              "type": "string",
+              "pattern": "^[ -~]{1,80}$"
+            },
+            "domain": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            "reference_label": {
+              "type": "string",
+              "pattern": "^[ -~]{1,80}$"
+            },
+            "evidence_scope": {
+              "const": "reported_health"
+            },
+            "state": {
+              "enum": [
+                "RUNNING",
+                "STOPPING",
+                "STOPPED",
+                "COMPLETED",
+                "FAILED",
+                "INVALIDATED",
+                "INTERRUPTED"
+              ]
+            },
+            "result": {
+              "enum": [
+                "PENDING",
+                "PASS",
+                "FAIL",
+                "INCOMPLETE"
+              ]
+            },
+            "completed_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9
+            },
+            "total_slots": {
+              "const": 9
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "source_identity": {
+              "const": "EXPECTED_REFERENCE_NOT_LOADED_PROOF"
+            },
+            "baseline": {
+              "const": "NOT_ACCEPTED"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "finished_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "next_checkpoint_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "report_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "checkpoints": {
+              "type": "array",
+              "maxItems": 9,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "slot",
+                  "state",
+                  "due_at",
+                  "observed_at",
+                  "reasons"
+                ],
+                "properties": {
+                  "slot": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "state": {
+                    "enum": [
+                      "CLAIMED",
+                      "HEALTHY",
+                      "UNHEALTHY",
+                      "UNAVAILABLE",
+                      "DISCARDED"
+                    ]
+                  },
+                  "due_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "observed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+                    },
+                    "maxItems": 16,
+                    "uniqueItems": true
+                  }
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "result": {
+                    "const": "PASS"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "state": {
+                    "const": "COMPLETED"
+                  },
+                  "completed_slots": {
+                    "const": 9
+                  },
+                  "reasons": {
+                    "maxItems": 0
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "STOPPED",
+                      "INVALIDATED",
+                      "INTERRUPTED"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "result": {
+                    "const": "INCOMPLETE"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "controller_instance_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "selected_profile": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile_id",
+            "integration_label",
+            "domain",
+            "reference_label",
+            "evidence_scope",
+            "source_identity",
+            "baseline"
+          ],
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+            },
+            "integration_label": {
+              "type": "string",
+              "pattern": "^[ -~]{1,80}$"
+            },
+            "domain": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            "reference_label": {
+              "type": "string",
+              "pattern": "^[ -~]{1,80}$"
+            },
+            "evidence_scope": {
+              "const": "reported_health"
+            },
+            "source_identity": {
+              "const": "EXPECTED_REFERENCE_NOT_LOADED_PROOF"
+            },
+            "baseline": {
+              "const": "NOT_ACCEPTED"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "description": "Authenticated payload only. The shared protocol validator additionally enforces original TTL, ordering, profile relationships, checkpoint cadence/window, terminal timing and result coherence. Pairing and replay custody are mandatory outside schema validation. UTC checkpoint bounds allow 2.001 seconds for the source engine wall/monotonic tolerance and millisecond projection; this does not prove or widen its strict 900-second monotonic acceptance window."
+}

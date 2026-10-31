@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Prepare a separate source review preserving the manual-dashboard contract commit
+  and the observation reporting candidate. Frontend acquisition remains solely in
+  the controller; this branch does not repair or claim a live publisher connection.
+
+### 0.5.0-beta.1 source candidate
+
+- Added optional explicitly paired signed observation reporting, durable sequence
+  protection, original feed expiry and four independent observation sensors.
+- Added a manual native-card observation section with selected/campaign identities,
+  checkpoint coverage, unavailable states and historical results. Existing eleven
+  deployment entities, eight actions and legacy status signatures remain unchanged.
+- Added real disposable persistence/permission/reload, HA adapter and loopback HTTP
+  tests alongside pure protocol/clock fixtures. This candidate is not a published or
+  installed release; pairing, installation/restart and live rendering remain separate.
+
+### Existing dashboard work
+
+- Explain expired reporting, unverified deployment identity, absent records and
+  unavailable validation/restart evidence instead of unexplained empty rows.
+  Accepted baselines and deployment outcomes keep their historical dates. These
+  presentation changes preserve entity, action and signed-status contracts.
 - Added the official HI Lab Controller Companion artwork as the README header while
   preserving the repository's public-safe controller/companion authority boundary.
 - Added an optional, importable `dashboards/hi-lab-operations.yaml` dashboard with a

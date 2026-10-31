@@ -97,7 +97,9 @@ editing Home Assistant storage.
 After the approved restart and configuration:
 
 1. Open **Settings → Devices & services → HI Lab Controller**.
-2. Confirm one service device and eleven registered entities.
+2. Confirm one service device and the eleven legacy deployment entities. The
+   0.5.0-beta.1 source candidate also registers four separate observation sensors;
+   unpaired reporting remains unavailable and does not revive deployment status.
 3. Confirm **Feed** is `fresh`; do not use **Last contact** as a substitute for
    current freshness.
 4. Confirm controller **Readiness**, **Mutation lock**, **Pending deployment**,
@@ -356,3 +358,10 @@ deployment or baseline. Before editing an established view, save its current raw
 so the presentation change can be reversed exactly. The optional local dashboard
 header can be removed separately after the previous dashboard configuration has been
 restored.
+
+## Optional observation reporting
+
+The 0.5.0-beta.1 source candidate adds four independently paired reporting sensors.
+See [Observation reporting](OBSERVATION_REPORTING.md) for explicit pairing, original
+expiry, historical results, manual dashboard placement and separate delivery gates.
+The existing eleven entities and eight actions described above keep their meanings.

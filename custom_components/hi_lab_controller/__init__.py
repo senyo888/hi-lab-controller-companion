@@ -29,6 +29,7 @@ from .const import (
 from .coordinator import HILabStatusCoordinator
 from .gateway import GatewayClient, GatewayError
 from .status_reader import StatusSnapshotReader
+from .observation import ObservationCoordinator, ObservationView
 
 PROFILE_SCHEMA = vol.Schema(
     {vol.Required("profile"): vol.In(("public_patch_1", "public_main"))}
@@ -44,10 +45,13 @@ class HILabRuntimeData:
 
     client: GatewayClient
     coordinator: HILabStatusCoordinator
+    observation: ObservationCoordinator | None = None
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register actions even when the controller config entry is unavailable."""
+
+    hass.http.register_view(ObservationView(hass))
 
     async def _admin_client(call: ServiceCall) -> tuple[GatewayClient, str]:
         user_id = call.context.user_id
@@ -299,7 +303,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     coordinator = HILabStatusCoordinator(hass, entry, reader)
     await coordinator.async_config_entry_first_refresh()
-    runtime = HILabRuntimeData(client=client, coordinator=coordinator)
+    observation = ObservationCoordinator(hass, entry)
+    await observation.initialize()
+    entry.async_on_unload(observation.stop)
+    runtime = HILabRuntimeData(client=client, coordinator=coordinator, observation=observation)
     hass.data.setdefault(RUNTIME_DATA, {})[entry.entry_id] = runtime
     entry.runtime_data = runtime
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -310,6 +317,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if not unloaded:
         return False
+    runtime = hass.data.get(RUNTIME_DATA, {}).get(entry.entry_id)
+    if runtime is not None and runtime.observation is not None:
+        await runtime.observation.async_close()
     hass.data.get(RUNTIME_DATA, {}).pop(entry.entry_id, None)
     hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     return True
