@@ -41,8 +41,11 @@ def entry(options):
 
 class HAAdapterTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.temp=tempfile.TemporaryDirectory()
-        # Real path avoids macOS /var -> /private/var aliases in custody tests.
+        # The custody contract rejects writable ancestors such as Linux /tmp.
+        # Use a fresh owner-only fixture below the private user home; never relax
+        # production guards or change permissions on shared runner directories.
+        self.temp=tempfile.TemporaryDirectory(prefix="hilc-ha-adapter-", dir=Path.home().resolve())
+        # Resolve any platform-specific aliases before exercising real custody.
         self.root=Path(self.temp.name).resolve()
         self.hass=HomeAssistant(str(self.root))
         self.options={o.ENABLED:True,o.INSTANCE:INSTANCE,o.EPOCH:EPOCH,o.SECRET:SECRET}
@@ -89,6 +92,17 @@ class HAAdapterTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(p.Invalid):await coordinator.receive(p.sign(payload(now=time.time()),SECRET))
         self.assertEqual(coordinator.current()['error'],'CUSTODY_WRITE_FAILED')
         self.assertIsNone(coordinator.current()['document'])
+
+    async def test_writable_config_ancestor_refuses_before_custody_creation(self):
+        for mode in (0o720, 0o702, 0o777):
+            with self.subTest(mode=oct(mode)):
+                self.root.chmod(mode)
+                try:
+                    with self.assertRaisesRegex(p.Invalid, 'CUSTODY_INVALID'):
+                        await o.prepare_pairing(self.hass,self.options,{})
+                    self.assertFalse((self.root/'.hi_lab_controller').exists())
+                finally:
+                    self.root.chmod(0o700)
 
     async def test_wrong_permissions_hardlink_and_symlink_refuse(self):
         await o.prepare_pairing(self.hass,self.options,{})

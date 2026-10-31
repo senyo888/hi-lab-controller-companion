@@ -42,9 +42,27 @@ The admitted candidate implementation and protocol/schema bytes were copied unch
 this preparation adds documentation and interoperability coverage.
 HACS Action and Hassfest on the proposed revision remain required before release.
 
-## Next decision
+## Source-preparation decision — 30 October 2026
 
 Accept the source review and authorize its separate commit/PR. Publication, release,
 installation/restart, pairing repair and dashboard import remain separate decisions.
 Only an accepted immutable Companion commit can support a proposed controller Git-link
 update. Preserve replay sequence custody during any later authorized maintenance.
+
+## CI correction — 31 October 2026
+
+The separate review PRs are now open. The maintainer authorized CI corrections,
+testing and pushes to those existing PRs; merge and runtime/release actions remain
+excluded. The earlier source-preparation decision above is historical.
+
+The first Linux HA adapter job used the system temporary directory, whose shared
+ancestor is correctly rejected by replay custody. Disposable fixtures now use a
+unique owner-only directory below the test user's resolved home. Tests restore and
+remove only their own fixtures; they do not change shared runner directories or
+weaken production ownership/permission checks. A negative test verifies refusal
+before custody creation when the synthetic config ancestor is group/world writable.
+
+Manifest fields are reordered for Hassfest (domain, name, then alphabetical), with
+values and version unchanged. Local/CI results for the correction are tracked in
+the existing PR; the earlier failed checks remain visible. This correction grants
+no installation, restart, campaign or release authority.

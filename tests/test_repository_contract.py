@@ -28,6 +28,11 @@ class RepositoryContractTests(unittest.TestCase):
 
     def test_manifest_identity_and_public_routes(self) -> None:
         manifest = json.loads((COMPONENT / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            list(manifest),
+            ["domain", "name", *sorted(set(manifest) - {"domain", "name"})],
+            "Hassfest requires domain, name, then alphabetical manifest keys",
+        )
         self.assertEqual(manifest["domain"], "hi_lab_controller")
         self.assertEqual(manifest["name"], "HI Lab Controller")
         self.assertEqual(manifest["version"], "0.5.0-beta.1")

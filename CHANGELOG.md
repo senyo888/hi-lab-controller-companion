@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Correct Hassfest manifest-key ordering without changing manifest values.
+- Make real HA adapter fixtures portable to Linux by placing their disposable
+  custody under the private test user's home; keep production ancestry guards
+  unchanged and cover group/world-writable config ancestry refusal.
+
 - Prepare a separate source review preserving the manual-dashboard contract commit
   and the observation reporting candidate. Frontend acquisition remains solely in
   the controller; this branch does not repair or claim a live publisher connection.
