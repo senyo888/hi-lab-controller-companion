@@ -20,7 +20,9 @@ jobs:
         with:
           python-version: "3.x"
       - name: Unit and repository-contract tests
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m pip install jsonschema PyYAML Jinja2
+          python -m unittest discover -s tests -v
       - name: Validate optional dashboard schema and truth contract
         run: ruby scripts/validate_dashboard.rb
       - name: Compile Python
@@ -36,3 +38,18 @@ jobs:
           echo "${digest}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
           "$RUNNER_TEMP/gitleaks/gitleaks" git --redact --no-banner .
+
+  observation-ha-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install pinned HA adapter validation environment
+        run: python -m pip install homeassistant==2026.9.0 jsonschema PyYAML
+      - name: Real HA library and loopback adapter tests
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -B -m unittest discover -s tests -p 'test_observation*.py' -v

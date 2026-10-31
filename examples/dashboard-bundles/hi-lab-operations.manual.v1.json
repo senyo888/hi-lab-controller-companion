@@ -1,0 +1,171 @@
+{
+  "$schema": "../../schemas/dashboard-bundle.schema.json",
+  "contract": "hi-lab-controller.dashboard-bundle",
+  "contract_version": 1,
+  "bundle": {
+    "id": "hi-lab-operations",
+    "version": "1.0.0-draft.1",
+    "lifecycle": "contract_example",
+    "title": "HI Lab operations manual dashboard bundle",
+    "source": {
+      "repository": "senyo888/hi-lab-controller-companion",
+      "commit": null,
+      "tag": null
+    }
+  },
+  "delivery": {
+    "mode": "manual_raw_yaml",
+    "automatic_install": false,
+    "browser_automation": false,
+    "direct_home_assistant_save": false,
+    "direct_storage_write": false,
+    "preview_required": true,
+    "backup_required_before_replace": true,
+    "explicit_admin_confirmation_required": true,
+    "readback_required": true,
+    "hacs_install_is_separate": true
+  },
+  "compatibility": {
+    "companion": {
+      "domain": "hi_lab_controller",
+      "minimum_version": "0.4.1",
+      "maximum_tested_version": "0.4.1",
+      "installation_owner": "hacs"
+    },
+    "home_assistant": {
+      "minimum_version": "2026.4.0"
+    },
+    "signed_status": {
+      "supported_major_versions": [
+        1,
+        2
+      ],
+      "capabilities": {
+        "dashboard": false
+      }
+    },
+    "cards": {
+      "profile": "home_assistant_core_only"
+    }
+  },
+  "dashboard": {
+    "artifact": {
+      "path": "dashboards/hi-lab-operations.yaml",
+      "sha256": "07182f0a74b6c02020e0c9ccbc6f7f778eafa7cd29e36776bf9e907bf0ea613b",
+      "bytes": 48482,
+      "media_type": "application/yaml"
+    },
+    "import_surface": "lovelace_raw_configuration_editor",
+    "read_only": true,
+    "entity_semantic_set": "hi-lab-controller.entities.v1"
+  },
+  "assets": [
+    {
+      "id": "operations_header",
+      "role": "runtime_asset",
+      "artifact": {
+        "path": "assets/hi-lab-controller-companion-dashboard-header.png",
+        "sha256": "ab5242dc486de1be3bbda02665530efdf6822e52293b58ac9ecb2a0f7ac7436b",
+        "bytes": 2584557,
+        "media_type": "image/png"
+      },
+      "required": true,
+      "install_target": "/local/hi-lab-controller/companion-dashboard-header.png"
+    },
+    {
+      "id": "operations_preview",
+      "role": "illustrative_preview",
+      "artifact": {
+        "path": "docs/images/hi-lab-operations-dashboard.svg",
+        "sha256": "a24addbb93c0edf155cc61f266105c0a029d6bedf3c3050cd3daa2d7582ecf16",
+        "bytes": 118237,
+        "media_type": "image/svg+xml"
+      },
+      "required": false
+    }
+  ],
+  "entity_semantic_set": {
+    "id": "hi-lab-controller.entities.v1",
+    "version": "1.0.0",
+    "count": 11,
+    "entities": [
+      {
+        "key": "status_feed",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_feed",
+        "unique_id": "hi_lab_controller_status_feed",
+        "semantic_role": "signed_feed_freshness"
+      },
+      {
+        "key": "last_contact",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_last_contact",
+        "unique_id": "hi_lab_controller_last_contact",
+        "semantic_role": "historical_last_contact"
+      },
+      {
+        "key": "controller_readiness",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_readiness",
+        "unique_id": "hi_lab_controller_controller_readiness",
+        "semantic_role": "controller_readiness"
+      },
+      {
+        "key": "active_deployment",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_active_deployment",
+        "unique_id": "hi_lab_controller_active_deployment",
+        "semantic_role": "active_deployment_identity"
+      },
+      {
+        "key": "pending_deployment",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_pending_deployment",
+        "unique_id": "hi_lab_controller_pending_deployment",
+        "semantic_role": "pending_deployment_identity"
+      },
+      {
+        "key": "mutation_lock",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_mutation_lock",
+        "unique_id": "hi_lab_controller_mutation_lock",
+        "semantic_role": "mutation_serialization"
+      },
+      {
+        "key": "accepted_baseline",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_accepted_baseline",
+        "unique_id": "hi_lab_controller_accepted_baseline",
+        "semantic_role": "recovery_baseline_acceptance"
+      },
+      {
+        "key": "last_validation",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_last_validation",
+        "unique_id": "hi_lab_controller_last_validation",
+        "semantic_role": "latest_validation_evidence"
+      },
+      {
+        "key": "last_outcome",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_last_outcome",
+        "unique_id": "hi_lab_controller_last_outcome",
+        "semantic_role": "latest_terminal_outcome"
+      },
+      {
+        "key": "prepare_queue",
+        "platform": "sensor",
+        "default_entity_id": "sensor.hi_lab_controller_prepare_queue",
+        "unique_id": "hi_lab_controller_prepare_queue",
+        "semantic_role": "prepare_queue_summary"
+      },
+      {
+        "key": "restart_required",
+        "platform": "binary_sensor",
+        "default_entity_id": "binary_sensor.hi_lab_controller_restart_required",
+        "unique_id": "hi_lab_controller_restart_required",
+        "semantic_role": "restart_requirement"
+      }
+    ]
+  }
+}

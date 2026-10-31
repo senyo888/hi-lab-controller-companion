@@ -56,12 +56,41 @@
       },
       "prepare_queue": {
         "name": "Prepare queue"
+      },
+      "observation_feed": {
+        "name": "Observation feed"
+      },
+      "observation_integration": {
+        "name": "Observation integration"
+      },
+      "observation_campaign": {
+        "name": "Observation campaign"
+      },
+      "observation_last_result": {
+        "name": "Observation last result"
       }
     },
     "binary_sensor": {
       "restart_required": {
         "name": "Restart required"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Pair observation reporting",
+        "description": "Enable the separately authenticated read-only observation feed. Enter the instance, epoch and reporting key supplied by the controller owner. This does not start a soak or enable deployment. Leave the key blank to retain it. Lost or restored replay custody requires a new epoch on both ends.",
+        "data": {
+          "observation_enabled": "Enable observation reporting",
+          "observation_controller_instance": "Controller instance UUID",
+          "observation_stream_epoch": "Stream epoch UUID",
+          "observation_secret": "Observation reporting key"
+        }
+      }
+    },
+    "error": {
+      "observation_pairing_failed": "Pairing could not be verified. Check the instance, epoch and key. Missing or invalid custody requires a new epoch; existing evidence is retained."
     }
   }
 }

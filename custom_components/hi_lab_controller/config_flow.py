@@ -6,6 +6,7 @@ import asyncio
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     TextSelector,
     TextSelectorConfig,
@@ -14,10 +15,16 @@ from homeassistant.helpers.selector import (
 
 from .const import CONF_SHARED_SECRET, DOMAIN
 from .gateway import GatewayClient, GatewayError
+from .observation import ENABLED, INSTANCE, EPOCH, SECRET, prepare_pairing
 
 
 class HILabControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return ObservationOptionsFlow()
 
     async def async_step_user(self, user_input=None):
         errors = {}
@@ -48,3 +55,27 @@ class HILabControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+
+class ObservationOptionsFlow(config_entries.OptionsFlowWithReload):
+    """Explicit receiver pairing; no commands or publisher enablement."""
+    async def async_step_init(self, user_input=None):
+        errors = {}
+        previous = dict(self.config_entry.options)
+        if user_input is not None:
+            values = dict(user_input)
+            if not values.get(SECRET):
+                values[SECRET] = previous.get(SECRET, "")
+            try:
+                result = await prepare_pairing(self.hass, values, previous)
+            except Exception:
+                errors["base"] = "observation_pairing_failed"
+            else:
+                return self.async_create_entry(title="", data=result)
+        schema = vol.Schema({
+            vol.Required(ENABLED, default=previous.get(ENABLED, False)): bool,
+            vol.Required(INSTANCE, default=previous.get(INSTANCE, "")): str,
+            vol.Required(EPOCH, default=previous.get(EPOCH, "")): str,
+            vol.Required(SECRET, default=""): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
+        })
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

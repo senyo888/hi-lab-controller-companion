@@ -11,6 +11,9 @@ control plane.
 - The companion may authenticate an administrator, write signed requests to its fixed
   local mailbox, read signed status, and request a restart only after the external
   controller approves the exact activation or rollback.
+- Optional observation v2 accepts only explicitly paired signed reporting through its
+  fixed admin-authenticated endpoint. Its four sensors and private replay custody
+  remain separate from legacy deployment truth. It has no Start/Stop or scheduler.
 - Never add Git, SSH, repository discovery, arbitrary URL/ref/path/target selection,
   package assembly, provider credentials, deployment policy, or release authority.
 - Never include secrets, tokens, private target identities, addresses, local machine
@@ -29,11 +32,17 @@ control plane.
 Run:
 
 ```bash
+python3 -m pip install jsonschema PyYAML Jinja2
 python3 -m unittest discover -s tests -v
 python3 -m compileall -q custom_components tests
 git diff --check
 gitleaks git --redact --no-banner .
 ```
+
+The separate HA adapter job uses the pinned Home Assistant validation environment.
+Without HA, those adapter tests explicitly skip; pure protocol, schema and panel
+fixtures remain runnable. Cross-repository interoperability additionally requires
+an explicitly selected `HILC_CONTROLLER_SOURCE`; no target credentials are used.
 
 HACS Action and Hassfest must also pass on GitHub before a release is treated as an
 installable companion candidate.

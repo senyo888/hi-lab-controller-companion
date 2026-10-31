@@ -15,6 +15,16 @@ The external controller remains private while its design characteristics, securi
 boundary, compatibility, and operational stability are completed. It is intended to
 become a separately published maintainer tool only after those release gates pass.
 
+The **0.5.0-beta.1 source candidate** adds separately paired integration-soak reporting:
+selected integration/reference, campaign state and checkpoints, and historical results.
+Its four observation sensors are independent of the eleven legacy deployment entities.
+Publication, installation and live rendering remain separate delivery steps. See
+[observation reporting](docs/OBSERVATION_REPORTING.md) and its optional manual dashboard
+section; an expired legacy feed does not become fresh merely because the native soak runs.
+
+[Source review and compatibility limits](docs/SOURCE_REVIEW.md) describe the prepared
+branch and the separate validation, publication and installation decisions.
+
 ## Install with custom HACS
 
 1. In HACS, open **Custom repositories**.

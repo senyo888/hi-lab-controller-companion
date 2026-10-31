@@ -1,0 +1,443 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/senyo888/hi-lab-controller-companion/blob/main/schemas/dashboard-bundle.schema.json",
+  "title": "HI Lab Controller companion manual dashboard bundle",
+  "description": "Contract for an inspectable, manual-only Home Assistant dashboard bundle. It does not authorize installation or dashboard mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract",
+    "contract_version",
+    "bundle",
+    "delivery",
+    "compatibility",
+    "dashboard",
+    "assets",
+    "entity_semantic_set"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "contract": {
+      "const": "hi-lab-controller.dashboard-bundle"
+    },
+    "contract_version": {
+      "const": 1
+    },
+    "bundle": {
+      "$ref": "#/$defs/bundleMetadata"
+    },
+    "delivery": {
+      "$ref": "#/$defs/manualDelivery"
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibility"
+    },
+    "dashboard": {
+      "$ref": "#/$defs/dashboard"
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/asset"
+      }
+    },
+    "entity_semantic_set": {
+      "$ref": "#/$defs/entitySemanticSet"
+    }
+  },
+  "$defs": {
+    "bundleMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "lifecycle",
+        "title",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "const": "hi-lab-operations"
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "lifecycle": {
+          "enum": [
+            "contract_example",
+            "released"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "source": {
+          "$ref": "#/$defs/sourceMetadata"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "const": "released"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "commit": {
+                    "type": "string"
+                  },
+                  "tag": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sourceMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "commit",
+        "tag"
+      ],
+      "properties": {
+        "repository": {
+          "const": "senyo888/hi-lab-controller-companion"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "tag": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        }
+      }
+    },
+    "manualDelivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "automatic_install",
+        "browser_automation",
+        "direct_home_assistant_save",
+        "direct_storage_write",
+        "preview_required",
+        "backup_required_before_replace",
+        "explicit_admin_confirmation_required",
+        "readback_required",
+        "hacs_install_is_separate"
+      ],
+      "properties": {
+        "mode": {
+          "const": "manual_raw_yaml"
+        },
+        "automatic_install": {
+          "const": false
+        },
+        "browser_automation": {
+          "const": false
+        },
+        "direct_home_assistant_save": {
+          "const": false
+        },
+        "direct_storage_write": {
+          "const": false
+        },
+        "preview_required": {
+          "const": true
+        },
+        "backup_required_before_replace": {
+          "const": true
+        },
+        "explicit_admin_confirmation_required": {
+          "const": true
+        },
+        "readback_required": {
+          "const": true
+        },
+        "hacs_install_is_separate": {
+          "const": true
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "companion",
+        "home_assistant",
+        "signed_status",
+        "cards"
+      ],
+      "properties": {
+        "companion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "domain",
+            "minimum_version",
+            "maximum_tested_version",
+            "installation_owner"
+          ],
+          "properties": {
+            "domain": {
+              "const": "hi_lab_controller"
+            },
+            "minimum_version": {
+              "$ref": "#/$defs/version"
+            },
+            "maximum_tested_version": {
+              "$ref": "#/$defs/version"
+            },
+            "installation_owner": {
+              "const": "hacs"
+            }
+          }
+        },
+        "home_assistant": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum_version"
+          ],
+          "properties": {
+            "minimum_version": {
+              "$ref": "#/$defs/version"
+            }
+          }
+        },
+        "signed_status": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "supported_major_versions",
+            "capabilities"
+          ],
+          "properties": {
+            "supported_major_versions": {
+              "const": [
+                1,
+                2
+              ]
+            },
+            "capabilities": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "dashboard"
+              ],
+              "properties": {
+                "dashboard": {
+                  "const": false
+                }
+              }
+            }
+          }
+        },
+        "cards": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile"
+          ],
+          "properties": {
+            "profile": {
+              "const": "home_assistant_core_only"
+            }
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact",
+        "import_surface",
+        "read_only",
+        "entity_semantic_set"
+      ],
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/file"
+        },
+        "import_surface": {
+          "const": "lovelace_raw_configuration_editor"
+        },
+        "read_only": {
+          "const": true
+        },
+        "entity_semantic_set": {
+          "const": "hi-lab-controller.entities.v1"
+        }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "artifact",
+        "required"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "role": {
+          "enum": [
+            "runtime_asset",
+            "illustrative_preview"
+          ]
+        },
+        "artifact": {
+          "$ref": "#/$defs/file"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "install_target": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^/local/[A-Za-z0-9._/-]+$"
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "bytes",
+        "media_type"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 33554432
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "entitySemanticSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "count",
+        "entities"
+      ],
+      "properties": {
+        "id": {
+          "const": "hi-lab-controller.entities.v1"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "count": {
+          "const": 11
+        },
+        "entities": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "$ref": "#/$defs/entitySemantic"
+          }
+        }
+      }
+    },
+    "entitySemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "platform",
+        "default_entity_id",
+        "unique_id",
+        "semantic_role"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "platform": {
+          "enum": [
+            "sensor",
+            "binary_sensor"
+          ]
+        },
+        "default_entity_id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^(?:sensor|binary_sensor)\\.hi_lab_controller_[a-z0-9_]+$"
+        },
+        "unique_id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^hi_lab_controller_[a-z0-9_]+$"
+        },
+        "semantic_role": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      }
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    }
+  }
+}

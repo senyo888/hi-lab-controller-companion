@@ -20,6 +20,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from .const import RUNTIME_DATA
 from .coordinator import HILabStatusCoordinator
 from .entity import HILabStatusEntity
+from .observation_sensor import entities as observation_entities
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -340,3 +341,6 @@ async def async_setup_entry(
             ),
         ]
     )
+    observation = hass.data[RUNTIME_DATA][entry.entry_id].observation
+    if observation is not None:
+        async_add_entities(observation_entities(observation))

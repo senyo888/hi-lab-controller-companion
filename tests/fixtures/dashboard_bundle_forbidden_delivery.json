@@ -1,0 +1,7 @@
+{
+  "description": "Contract-negative override: automatic browser-driven Home Assistant saves must be rejected.",
+  "delivery_overrides": {
+    "browser_automation": true,
+    "direct_home_assistant_save": true
+  }
+}
